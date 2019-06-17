@@ -1,6 +1,7 @@
 # SpriteSheetRenderer
 A powerful Unity ECS system to render massive numbers of animated sprites:
-
+##### 200k entities were rendered at 80 fps on a Mid-2015 MacBook Pro.
+![N|Solid](https://i.imgur.com/Jqh9FQs.png)
 ### How to use:
 * 1- Create the Archetype:
 
