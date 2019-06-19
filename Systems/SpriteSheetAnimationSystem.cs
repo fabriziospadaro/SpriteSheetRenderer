@@ -33,7 +33,7 @@ public class SpriteSheetAnimationSystem : JobComponentSystem {
       }
     }
     public bool NextWillReachEnd(SpriteSheet sprite) {
-      return sprite.spriteIndex + 1 >= sprite.cell.x * sprite.cell.y;
+      return sprite.spriteIndex + 1 >= sprite.maxSprites;
     }
   }
 
