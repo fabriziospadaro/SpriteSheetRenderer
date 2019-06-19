@@ -22,7 +22,7 @@ public class SpriteSheetDemo : MonoBehaviour {
       typeof(SpriteSheetMaterial),
       typeof(UvBuffer)
     );
-    //4.5 ms vecchio sistema con 5k di unità
+
     NativeArray<Entity> entities = new NativeArray<Entity>(200000, Allocator.Temp);
     entityManager.CreateEntity(spriteSheetArchetype, entities);
     float2[] cameraBound = Bound2DExtension.BoundValuesFromCamera(Camera.main);
