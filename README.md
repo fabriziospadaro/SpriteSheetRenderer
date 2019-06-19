@@ -34,7 +34,7 @@ for(int i = 0; i < entities.Length; i++) {
   float2 position = A_RANDOM_POSITION;
   entityManager.SetComponentData(entities[i], new Position2D { Value = position });
   entityManager.SetComponentData(entities[i], new Scale { Value = UnityEngine.Random.Range(0.1f, 1f) });
-  entityManager.SetComponentData(entities[i], new SpriteSheet { spriteIndex = UnityEngine.Random.Range(0, 16), cell = new int2(4, 4) });
+  entityManager.SetComponentData(entities[i], new SpriteSheet { spriteIndex = UnityEngine.Random.Range(0, uvs.Length), maxSprites = uvs.Length });
   entityManager.SetComponentData(entities[i], new SpriteSheetAnimation { play = true, repetition = SpriteSheetAnimation.RepetitionType.Loop, samples = 10 });
   entityManager.SetSharedComponentData(entities[i], new SpriteSheetMaterial { material = material });
   //store the uvs into a dynamic buffer
