@@ -14,7 +14,8 @@ spriteSheetArchetype = entityManager.CreateArchetype(
   typeof(Bound2D),
   typeof(SpriteSheet),
   typeof(SpriteSheetAnimation),
-  typeof(SpriteSheetMaterial)
+  typeof(SpriteSheetMaterial),
+  typeof(UvBuffer)
 );
 ```
 
@@ -28,6 +29,7 @@ entityManager.CreateEntity(spriteSheetArchetype, entities);
 * 3- Fill the values of each entity:
 
 ```sh
+float4[] uvs = SpriteSheetCache.BakeUv(material);
 for(int i = 0; i < entities.Length; i++) {
   float2 position = A_RANDOM_POSITION;
   entityManager.SetComponentData(entities[i], new Position2D { Value = position });
@@ -35,6 +37,10 @@ for(int i = 0; i < entities.Length; i++) {
   entityManager.SetComponentData(entities[i], new SpriteSheet { spriteIndex = UnityEngine.Random.Range(0, 16), cell = new int2(4, 4) });
   entityManager.SetComponentData(entities[i], new SpriteSheetAnimation { play = true, repetition = SpriteSheetAnimation.RepetitionType.Loop, samples = 10 });
   entityManager.SetSharedComponentData(entities[i], new SpriteSheetMaterial { material = material });
+  //store the uvs into a dynamic buffer
+  var lookup = entityManager.GetBuffer<UvBuffer>(entities[i]);
+  for(int j = 0; j < uvs.Length; j++)
+  	lookup.Add(new UvBuffer { uv = uvs[j] });
 }
 entities.Dispose();
 ```

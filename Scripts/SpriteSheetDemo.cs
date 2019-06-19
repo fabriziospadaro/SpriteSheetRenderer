@@ -26,6 +26,7 @@ public class SpriteSheetDemo : MonoBehaviour {
     NativeArray<Entity> entities = new NativeArray<Entity>(200000, Allocator.Temp);
     entityManager.CreateEntity(spriteSheetArchetype, entities);
     float2[] cameraBound = Bound2DExtension.BoundValuesFromCamera(Camera.main);
+    //bake the uvs
     float4[] uvs = SpriteSheetCache.BakeUv(material);
     for(int i = 0; i < entities.Length; i++) {
       float2 position = cameraBound[0] + new float2(UnityEngine.Random.Range(-cameraBound[1].x / 2, cameraBound[1].x / 2), UnityEngine.Random.Range(-cameraBound[1].y / 2, cameraBound[1].y / 2));
@@ -34,6 +35,7 @@ public class SpriteSheetDemo : MonoBehaviour {
       entityManager.SetComponentData(entities[i], new SpriteSheet { spriteIndex = UnityEngine.Random.Range(0, 16), maxSprites = uvs.Length });
       entityManager.SetComponentData(entities[i], new SpriteSheetAnimation { play = true, repetition = SpriteSheetAnimation.RepetitionType.Loop, samples = 10 });
       entityManager.SetSharedComponentData(entities[i], new SpriteSheetMaterial { material = material });
+      //store the uvs into a dynamic buffer
       var lookup = entityManager.GetBuffer<UvBuffer>(entities[i]);
       for(int j = 0; j < uvs.Length; j++)
         lookup.Add(new UvBuffer { uv = uvs[j] });
