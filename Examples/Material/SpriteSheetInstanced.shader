@@ -27,10 +27,12 @@
             sampler2D _MainTex;
 
             StructuredBuffer<float4x2> matrixBuffer;
+			StructuredBuffer<float4> colorsBuffer;
 
             struct v2f{
                 float4 pos : SV_POSITION;
                 float2 uv: TEXCOORD0;
+				fixed4 color : COLOR0;
             };
 
             float4x4 rotationZMatrix(float rZ){
@@ -59,14 +61,16 @@
                 v2f o;
                 o.pos = UnityObjectToClipPos(float4(worldPosition, 1.0f));
                 o.uv =  v.texcoord * uv.xy + uv.zw;
+				o.color = colorsBuffer[instanceID];
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target{
-                fixed4 albedo = tex2D(_MainTex, i.uv);
-                clip(albedo.a - 1.0 / 255.0);
-                albedo.rgb *= albedo.a;
-                return albedo;
+                fixed4 col = tex2D(_MainTex, i.uv) * i.color;
+				clip(col.a - 1.0 / 255.0);
+                col.rgb *= col.a;
+
+				return col;
             }
 
             ENDCG

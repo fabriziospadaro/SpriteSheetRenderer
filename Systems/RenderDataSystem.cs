@@ -8,10 +8,11 @@ using Unity.Collections;
 [UpdateAfter(typeof(SpriteSheetAnimationSystem))]
 public class RenderDataSystem : JobComponentSystem {
   [BurstCompile]
-  struct ShaderDataJob : IJobForEachWithEntity<Position2D, Scale, Rotation2D, RenderData, SpriteSheet> {
+  struct ShaderDataJob : IJobForEachWithEntity<Position2D, Scale, Rotation2D, SpriteColor, RenderData, SpriteSheet> {
     [ReadOnly] public BufferFromEntity<UvBuffer> lookup;
-    public void Execute(Entity entity, int index, [ReadOnly]ref Position2D translation, [ReadOnly] ref Scale scale, [ReadOnly] ref Rotation2D rotation, ref RenderData renderData, [ReadOnly]ref SpriteSheet spriteSheet) {
+    public void Execute(Entity entity, int index, [ReadOnly]ref Position2D translation, [ReadOnly] ref Scale scale, [ReadOnly] ref Rotation2D rotation, [ReadOnly] ref SpriteColor color, ref RenderData renderData, [ReadOnly]ref SpriteSheet spriteSheet) {
       renderData.transform = new float4(translation.Value, rotation.angle, scale.Value);
+      renderData.color = color.value;
       renderData.uv = lookup[entity][spriteSheet.spriteIndex].uv;
     }
   }
