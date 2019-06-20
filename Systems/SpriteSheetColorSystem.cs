@@ -6,8 +6,8 @@ using Unity.Collections;
 [UpdateAfter(typeof(SpriteSheetAnimationSystem))]
 public class SpriteSheetColorSystem : JobComponentSystem {
   [BurstCompile]
-  struct SpriteSheetColorJob : IJobForEach<SpriteColor, RenderData> {
-    public void Execute([ReadOnly] ref SpriteColor color, ref RenderData renderData) {
+  struct SpriteSheetColorJob : IJobForEach<SpriteSheetColor, RenderData> {
+    public void Execute([ReadOnly] ref SpriteSheetColor color, ref RenderData renderData) {
       renderData.color = color.value;
     }
   }

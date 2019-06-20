@@ -5,6 +5,6 @@ using Unity.Mathematics;
 using UnityEngine;
 
 [System.Serializable]
-public struct SpriteColor : IComponentData {
+public struct SpriteSheetColor : IComponentData {
   public float4 value;
 }

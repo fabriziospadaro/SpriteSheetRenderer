@@ -11,11 +11,11 @@ spriteSheetArchetype = entityManager.CreateArchetype(
   typeof(Position2D),
   typeof(Rotation2D),
   typeof(Scale),
-  typeof(Bound2D),
   typeof(SpriteSheet),
   typeof(SpriteSheetAnimation),
   typeof(SpriteSheetMaterial),
-  typeof(UvBuffer)
+  typeof(UvBuffer),
+  typeof(RenderData)
 );
 ```
 
@@ -29,18 +29,19 @@ entityManager.CreateEntity(spriteSheetArchetype, entities);
 * 3- Fill the values of each entity:
 
 ```sh
-float4[] uvs = SpriteSheetCache.BakeUv(material);
+KeyValuePair<Material, float4[]> atlasData = SpriteSheetCache.BakeSprites(sprites);
+spritesCount = atlasData.Value.Length;
 for(int i = 0; i < entities.Length; i++) {
   float2 position = A_RANDOM_POSITION;
   entityManager.SetComponentData(entities[i], new Position2D { Value = position });
   entityManager.SetComponentData(entities[i], new Scale { Value = UnityEngine.Random.Range(0.1f, 1f) });
-  entityManager.SetComponentData(entities[i], new SpriteSheet { spriteIndex = UnityEngine.Random.Range(0, uvs.Length), maxSprites = uvs.Length });
+  entityManager.SetComponentData(entities[i], new SpriteSheet { spriteIndex = UnityEngine.Random.Range(0, spritesCount), maxSprites = spritesCount });
   entityManager.SetComponentData(entities[i], new SpriteSheetAnimation { play = true, repetition = SpriteSheetAnimation.RepetitionType.Loop, samples = 10 });
-  entityManager.SetSharedComponentData(entities[i], new SpriteSheetMaterial { material = material });
+  entityManager.SetSharedComponentData(entities[i], new SpriteSheetMaterial { material = atlasData.Key });
   //store the uvs into a dynamic buffer
   var lookup = entityManager.GetBuffer<UvBuffer>(entities[i]);
-  for(int j = 0; j < uvs.Length; j++)
-  	lookup.Add(new UvBuffer { uv = uvs[j] });
+  for(int j = 0; j < atlasData.Value.Length; j++)
+  	buffer.Add(atlasData.Value[j]);
 }
 entities.Dispose();
 ```

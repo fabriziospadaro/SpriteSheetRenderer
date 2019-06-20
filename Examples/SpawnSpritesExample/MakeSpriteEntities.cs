@@ -38,7 +38,7 @@ namespace ECSSpriteSheetAnimation.Examples {
          typeof(SpriteSheetAnimation),
          typeof(SpriteSheetMaterial),
          typeof(UvBuffer),
-         typeof(SpriteColor),
+         typeof(SpriteSheetColor),
          typeof(RenderData)
       );
 
@@ -59,7 +59,7 @@ namespace ECSSpriteSheetAnimation.Examples {
         Position2D pos = new Position2D { Value = rand.NextFloat2(area.min, area.max) };
         SpriteSheetAnimation anim = new SpriteSheetAnimation { play = true, repetition = SpriteSheetAnimation.RepetitionType.Loop, samples = 10 };
         var color = UnityEngine.Random.ColorHSV(.15f, .75f);
-        SpriteColor col = new SpriteColor { value = new float4(color.r, color.g, color.b, color.a) };
+        SpriteSheetColor col = new SpriteSheetColor { value = new float4(color.r, color.g, color.b, color.a) };
         eManager.SetComponentData(e, sheet);
         eManager.SetComponentData(e, scale);
         eManager.SetComponentData(e, pos);
