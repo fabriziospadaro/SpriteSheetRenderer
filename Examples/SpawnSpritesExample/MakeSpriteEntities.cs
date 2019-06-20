@@ -19,14 +19,20 @@ namespace ECSSpriteSheetAnimation.Examples {
     [SerializeField]
     float2 spawnArea = new float2(100, 100);
 
+    [SerializeField]
+    float minScale = .25f;
+    [SerializeField]
+    float maxScale = 2f;
+
+
     Rect GetSpawnArea() {
       Rect r = new Rect(0, 0, spawnArea.x, spawnArea.y);
       r.center = transform.position;
       return r;
     }
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem) {
-      var arch = dstManager.CreateArchetype(
+    public void Convert(Entity entity, EntityManager eManager, GameObjectConversionSystem conversionSystem) {
+      var archetype = eManager.CreateArchetype(
             typeof(Position2D),
             typeof(Rotation2D),
             typeof(Scale),
@@ -34,11 +40,12 @@ namespace ECSSpriteSheetAnimation.Examples {
             typeof(SpriteSheet),
             typeof(SpriteSheetAnimation),
             typeof(SpriteSheetMaterial),
-            typeof(UvBuffer)
+            typeof(UvBuffer),
+            typeof(SpriteColor)
           );
 
       NativeArray<Entity> entities = new NativeArray<Entity>(spriteCount, Allocator.Temp);
-      dstManager.CreateEntity(arch, entities);
+      eManager.CreateEntity(archetype, entities);
 
       float4[] uvs = SpriteSheetCache.BakeUv(material);
       int cellCount = uvs.Length;
@@ -51,18 +58,20 @@ namespace ECSSpriteSheetAnimation.Examples {
         Entity e = entities[i];
 
         SpriteSheet sheet = new SpriteSheet { spriteIndex = rand.NextInt(0, cellCount), maxSprites = cellCount };
-        Scale scale = new Scale { Value = rand.NextFloat(.25f, 2) };
+        Scale scale = new Scale { Value = rand.NextFloat(minScale, maxScale) };
         Position2D pos = new Position2D { Value = rand.NextFloat2(area.min, area.max) };
         SpriteSheetAnimation anim = new SpriteSheetAnimation { play = true, repetition = SpriteSheetAnimation.RepetitionType.Loop, samples = 10 };
-
-        dstManager.SetComponentData(e, sheet);
-        dstManager.SetComponentData(e, scale);
-        dstManager.SetComponentData(e, pos);
-        dstManager.SetComponentData(e, anim);
-        dstManager.SetSharedComponentData(e, mat);
+        var color = UnityEngine.Random.ColorHSV(.15f, .75f);
+        SpriteColor col = new SpriteColor { value = new float4(color.r, color.g, color.b, color.a) };
+        eManager.SetComponentData(e, sheet);
+        eManager.SetComponentData(e, scale);
+        eManager.SetComponentData(e, pos);
+        eManager.SetComponentData(e, anim);
+        eManager.SetComponentData(e, col);
+        eManager.SetSharedComponentData(e, mat);
 
         // Fill uv buffer
-        var buffer = dstManager.GetBuffer<UvBuffer>(entities[i]);
+        var buffer = eManager.GetBuffer<UvBuffer>(entities[i]);
         for(int j = 0; j < uvs.Length; j++)
           buffer.Add(uvs[j]);
 

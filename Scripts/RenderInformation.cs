@@ -3,6 +3,7 @@
 class RenderInformation {
   public ComputeBuffer matrixBuffer;
   public ComputeBuffer argsBuffer;
+  public ComputeBuffer colorsBuffer;
   public Material material;
   public uint[] args;
 
@@ -23,5 +24,9 @@ class RenderInformation {
     if(argsBuffer != null)
       argsBuffer.Release();
     argsBuffer = null;
+
+    if (colorsBuffer != null)
+        colorsBuffer.Release();
+    colorsBuffer = null;
   }
 }

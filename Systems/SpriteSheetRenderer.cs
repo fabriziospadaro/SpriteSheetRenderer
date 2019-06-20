@@ -45,42 +45,57 @@ public class SpriteSheetRenderer : ComponentSystem {
         Graphics.DrawMeshInstancedIndirect(mesh, 0, renderInfos[i].material, new Bounds(Vector2.zero, Vector3.one), renderInfos[i].argsBuffer);
 
   }
-  void ClearMatrixBuffer(int bufferID) {
+  void ClearDataBuffers(int bufferID) {
     if(renderInfos[bufferID].matrixBuffer != null)
       renderInfos[bufferID].matrixBuffer.Release();
+    if(renderInfos[bufferID].colorsBuffer != null)
+      renderInfos[bufferID].colorsBuffer.Release();
   }
 
   int UpdateBuffers(int renderIndex) {
-    ClearMatrixBuffer(renderIndex);
+    ClearDataBuffers(renderIndex);
     processable.SetFilter(new SpriteSheetMaterial { material = renderInfos[renderIndex].material });
-    NativeArray<RenderData> data = processable.ToComponentDataArray<RenderData>(Allocator.TempJob);
-    int instanceCount = data.Length;
+    NativeArray<RenderData> renderData = processable.ToComponentDataArray<RenderData>(Allocator.TempJob);
+    int instanceCount = renderData.Length;
     if(instanceCount > 0) {
-      NativeArray<float4x2> matrix = new NativeArray<float4x2>(instanceCount, Allocator.TempJob);
-      var job = new CalculateMatrixJob() {
-        datas = data,
-        matrix = matrix
+      NativeArray<float4x2> matrices = new NativeArray<float4x2>(instanceCount, Allocator.TempJob);
+      NativeArray<float4> colors = new NativeArray<float4>(instanceCount, Allocator.TempJob);
+      var job = new ProcessRenderDataJob() {
+        renderData = renderData,
+        matrices = matrices,
+        colors = colors,
       };
       JobHandle jobHandle = job.Schedule();
       jobHandle.Complete();
+
       renderInfos[renderIndex].matrixBuffer = new ComputeBuffer(instanceCount, 32);
-      renderInfos[renderIndex].matrixBuffer.SetData(job.matrix);
+      renderInfos[renderIndex].matrixBuffer.SetData(job.matrices);
       renderInfos[renderIndex].material.SetBuffer("matrixBuffer", renderInfos[renderIndex].matrixBuffer);
+      matrices.Dispose();
+
       renderInfos[renderIndex].args[1] = (uint)instanceCount;
       renderInfos[renderIndex].argsBuffer.SetData(renderInfos[renderIndex].args);
-      matrix.Dispose();
+
+      renderInfos[renderIndex].colorsBuffer = new ComputeBuffer(instanceCount, sizeof(float) * 4);
+      renderInfos[renderIndex].colorsBuffer.SetData(job.colors);
+      renderInfos[renderIndex].material.SetBuffer("colorsBuffer", renderInfos[renderIndex].colorsBuffer);
+      colors.Dispose();
     }
-    data.Dispose();
+
+    renderData.Dispose();
     return instanceCount;
   }
 }
 
 [BurstCompile]
-struct CalculateMatrixJob : IJob {
-  public NativeArray<float4x2> matrix;
-  [ReadOnly] public NativeArray<RenderData> datas;
+struct ProcessRenderDataJob : IJob {
+  public NativeArray<float4x2> matrices;
+  public NativeArray<float4> colors;
+  [ReadOnly] public NativeArray<RenderData> renderData;
   public void Execute() {
-    for(int i = 0; i < datas.Length; i++)
-      matrix[i] = new float4x2(datas[i].transform, datas[i].uv);
+    for(int i = 0; i < renderData.Length; i++) {
+      matrices[i] = new float4x2(renderData[i].transform, renderData[i].uv);
+      colors[i] = renderData[i].color;
+    }
   }
 }
