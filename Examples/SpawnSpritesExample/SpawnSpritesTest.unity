@@ -217,8 +217,8 @@ MonoBehaviour:
   - {fileID: -3705341209193386819, guid: b69255563ed34ad46a892a322ceec4d8, type: 3}
   - {fileID: -8532015669230584892, guid: b69255563ed34ad46a892a322ceec4d8, type: 3}
   spawnArea:
-    x: 100
-    y: 49.05
+    x: 859.86
+    y: 476.7
   minScale: 0.25
   maxScale: 2
 --- !u!4 &46377964
@@ -297,11 +297,11 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: -20
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 25
+  orthographic size: 250
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2

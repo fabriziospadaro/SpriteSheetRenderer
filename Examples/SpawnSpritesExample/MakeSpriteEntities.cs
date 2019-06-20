@@ -33,7 +33,7 @@ namespace ECSSpriteSheetAnimation.Examples {
          typeof(Position2D),
          typeof(Rotation2D),
          typeof(Scale),
-         typeof(Bound2D),
+         //typeof(Bound2D),
          typeof(SpriteSheet),
          typeof(SpriteSheetAnimation),
          typeof(SpriteSheetMaterial),
