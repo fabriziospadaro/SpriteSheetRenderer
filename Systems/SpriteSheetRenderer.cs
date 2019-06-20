@@ -5,7 +5,7 @@ using Unity.Burst;
 using Unity.Jobs;
 using Unity.Collections;
 using Unity.Mathematics;
-//[UpdateAfter(typeof(OcclusionCullingSystem))]
+
 public class SpriteSheetRenderer : ComponentSystem {
   private Mesh mesh;
 
