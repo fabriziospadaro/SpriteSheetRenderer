@@ -1,17 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Unity.Mathematics;
-using UnityEditor;
 using UnityEngine;
-
 public static class SpriteSheetCache {
-  public static float4[] BakeUv(Material material) {
-    Texture texture = material.mainTexture;
-    string spriteSheet = AssetDatabase.GetAssetPath(material.mainTexture);
-    Sprite[] sprites = AssetDatabase.LoadAllAssetsAtPath(spriteSheet).OfType<Sprite>().ToArray();
-    if(sprites.Length == 0) {
-      return new float4[1] { new float4(1, 1, 0, 0) };
+  public static KeyValuePair<Material, float4[]> BakeSprites(Sprite[] sprites) {
+    Material material = new Material(Shader.Find("Instanced/SpriteSheet"));
+    Texture texture = sprites[0].texture;
+    material.mainTexture = texture;
+    if(sprites.Length == 1) {
+      return new KeyValuePair<Material, float4[]>(material, new float4[1] { new float4(1, 1, 0, 0) });
     }
     else {
       float w = texture.width;
@@ -29,7 +26,7 @@ public static class SpriteSheetCache {
         uvs[i].w = OffsetY;
         i++;
       }
-      return uvs;
+      return new KeyValuePair<Material, float4[]>(material, uvs);
     }
   }
 }

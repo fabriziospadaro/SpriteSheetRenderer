@@ -1,24 +1,21 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 using Random = Unity.Mathematics.Random;
-
+using UnityEngine.U2D;
 namespace ECSSpriteSheetAnimation.Examples {
   public class MakeSpriteEntities : UnityEngine.MonoBehaviour, IConvertGameObjectToEntity {
     [SerializeField]
     int spriteCount = 5000;
 
     [SerializeField]
-    Material material = null;
+    Sprite[] sprites;
 
     [SerializeField]
     float2 spawnArea = new float2(100, 100);
-
     [SerializeField]
     float minScale = .25f;
     [SerializeField]
@@ -47,13 +44,12 @@ namespace ECSSpriteSheetAnimation.Examples {
       NativeArray<Entity> entities = new NativeArray<Entity>(spriteCount, Allocator.Temp);
       eManager.CreateEntity(archetype, entities);
 
-      float4[] uvs = SpriteSheetCache.BakeUv(material);
-      int cellCount = uvs.Length;
+      KeyValuePair<Material, float4[]> atlasData = SpriteSheetCache.BakeSprites(sprites);
+      int cellCount = atlasData.Value.Length;
 
       Random rand = new Random((uint)UnityEngine.Random.Range(0, int.MaxValue));
       Rect area = GetSpawnArea();
-      SpriteSheetMaterial mat = new SpriteSheetMaterial { material = material };
-
+      SpriteSheetMaterial material = new SpriteSheetMaterial { material = atlasData.Key };
       for(int i = 0; i < entities.Length; i++) {
         Entity e = entities[i];
 
@@ -68,12 +64,12 @@ namespace ECSSpriteSheetAnimation.Examples {
         eManager.SetComponentData(e, pos);
         eManager.SetComponentData(e, anim);
         eManager.SetComponentData(e, col);
-        eManager.SetSharedComponentData(e, mat);
+        eManager.SetSharedComponentData(e, material);
 
         // Fill uv buffer
         var buffer = eManager.GetBuffer<UvBuffer>(entities[i]);
-        for(int j = 0; j < uvs.Length; j++)
-          buffer.Add(uvs[j]);
+        for(int j = 0; j < atlasData.Value.Length; j++)
+          buffer.Add(atlasData.Value[j]);
 
       }
     }

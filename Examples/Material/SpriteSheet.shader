@@ -1,4 +1,4 @@
- Shader "Instanced/SpriteSheetInstanced" {
+ Shader "Instanced/SpriteSheet" {
     Properties {
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
     }
