@@ -30,16 +30,17 @@ namespace ECSSpriteSheetAnimation.Examples {
 
     public void Convert(Entity entity, EntityManager eManager, GameObjectConversionSystem conversionSystem) {
       var archetype = eManager.CreateArchetype(
-            typeof(Position2D),
-            typeof(Rotation2D),
-            typeof(Scale),
-            typeof(Bound2D),
-            typeof(SpriteSheet),
-            typeof(SpriteSheetAnimation),
-            typeof(SpriteSheetMaterial),
-            typeof(UvBuffer),
-            typeof(SpriteColor)
-          );
+         typeof(Position2D),
+         typeof(Rotation2D),
+         typeof(Scale),
+         typeof(Bound2D),
+         typeof(SpriteSheet),
+         typeof(SpriteSheetAnimation),
+         typeof(SpriteSheetMaterial),
+         typeof(UvBuffer),
+         typeof(SpriteColor),
+         typeof(RenderData)
+      );
 
       NativeArray<Entity> entities = new NativeArray<Entity>(spriteCount, Allocator.Temp);
       eManager.CreateEntity(archetype, entities);

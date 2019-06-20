@@ -8,7 +8,7 @@ public class SpriteSheetScaleSystem : JobComponentSystem {
   [BurstCompile]
   struct SpriteSheetScaleJob : IJobForEach<Scale, RenderData> {
     public void Execute([ReadOnly] ref Scale scale, ref RenderData renderData) {
-      renderData.transform.w = scale.Value;
+      renderData.matrix.c0.w = scale.Value;
     }
   }
 

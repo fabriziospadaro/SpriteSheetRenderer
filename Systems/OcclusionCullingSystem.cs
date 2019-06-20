@@ -3,8 +3,9 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Jobs;
 using Unity.Collections;
-
+/*
 public class OcclusionCullingSystem : JobComponentSystem {
+
 
   EntityCommandBufferSystem barrier;
 
@@ -39,5 +40,6 @@ public class OcclusionCullingSystem : JobComponentSystem {
     return job;
   }
 }
+*/
 
 

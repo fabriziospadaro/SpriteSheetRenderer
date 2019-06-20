@@ -8,8 +8,8 @@ public class SpriteSheetPositionSystem : JobComponentSystem {
   [BurstCompile]
   struct SpriteSheetPositionJob : IJobForEach<Position2D, RenderData> {
     public void Execute([ReadOnly]ref Position2D translation, ref RenderData renderData) {
-      renderData.transform.x = translation.Value.x;
-      renderData.transform.y = translation.Value.y;
+      renderData.matrix.c0.x = translation.Value.x;
+      renderData.matrix.c0.y = translation.Value.y;
     }
   }
 

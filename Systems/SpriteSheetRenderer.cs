@@ -5,6 +5,7 @@ using Unity.Burst;
 using Unity.Jobs;
 using Unity.Collections;
 using Unity.Mathematics;
+using Unity.Collections.LowLevel.Unsafe;
 
 public class SpriteSheetRenderer : ComponentSystem {
   private Mesh mesh;
@@ -94,7 +95,7 @@ struct ProcessRenderDataJob : IJob {
   [ReadOnly] public NativeArray<RenderData> renderData;
   public void Execute() {
     for(int i = 0; i < renderData.Length; i++) {
-      matrices[i] = new float4x2(renderData[i].transform, renderData[i].uv);
+      matrices[i] = renderData[i].matrix;
       colors[i] = renderData[i].color;
     }
   }
