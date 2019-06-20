@@ -21,6 +21,12 @@ namespace ECSSpriteSheetAnimation.Examples
         [SerializeField]
         float2 spawnArea_ = new float2(100, 100);
 
+        [SerializeField]
+        float minScale_ = .25f;
+
+        [SerializeField]
+        float maxScale_ = 2f;
+
         Rect GetSpawnArea()
         {
             Rect r = new Rect(0, 0, spawnArea_.x, spawnArea_.y);
@@ -38,7 +44,8 @@ namespace ECSSpriteSheetAnimation.Examples
                   typeof(SpriteSheet),
                   typeof(SpriteSheetAnimation),
                   typeof(SpriteSheetMaterial),
-                  typeof(UvBuffer)
+                  typeof(UvBuffer),
+                  typeof(SpriteColor)
                 );
 
             NativeArray<Entity> entities = new NativeArray<Entity>(spriteCount_, Allocator.Temp);
@@ -55,16 +62,17 @@ namespace ECSSpriteSheetAnimation.Examples
             {
                 Entity e = entities[i];
 
-                SpriteSheet sheet = new SpriteSheet { spriteIndex = rand.NextInt(0, cellCount), maxSprites = cellCount };
-                Scale scale = new Scale { Value = rand.NextFloat(.25f, 2) };
-                Position2D pos = new Position2D { Value = rand.NextFloat2(area.min, area.max) };
-                SpriteSheetAnimation anim = new SpriteSheetAnimation
-                { play = true, repetition = SpriteSheetAnimation.RepetitionType.Loop, samples = 10 };
+                SpriteSheet          sheet = new SpriteSheet { spriteIndex = rand.NextInt(0, cellCount), maxSprites = cellCount };
+                Scale                scale = new Scale { Value = rand.NextFloat(minScale_, maxScale_) };
+                Position2D           pos   = new Position2D { Value = rand.NextFloat2(area.min, area.max) };
+                SpriteSheetAnimation anim = new SpriteSheetAnimation { play = true, repetition = SpriteSheetAnimation.RepetitionType.Loop, samples = 10 };
+                SpriteColor          col = UnityEngine.Random.ColorHSV(.15f, .75f);
 
                 dstManager.SetComponentData(e, sheet);
                 dstManager.SetComponentData(e, scale);
                 dstManager.SetComponentData(e, pos);
                 dstManager.SetComponentData(e, anim);
+                dstManager.SetComponentData(e, col);
                 dstManager.SetSharedComponentData(e, mat);
 
                 // Fill uv buffer
