@@ -7,6 +7,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using Unity.Collections.LowLevel.Unsafe;
 
+[DisableAutoCreation]
 public class SpriteSheetRenderer : ComponentSystem {
   private Mesh mesh;
 

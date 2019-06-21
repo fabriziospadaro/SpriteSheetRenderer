@@ -2,13 +2,17 @@
 using Unity.Burst;
 using Unity.Jobs;
 using Unity.Collections;
+using Unity.Mathematics;
 
-[UpdateAfter(typeof(SpriteSheetAnimationSystem))]
+[DisableAutoCreation]
 public class SpriteSheetColorSystem : JobComponentSystem {
+  
+
   [BurstCompile]
   struct SpriteSheetColorJob : IJobForEach<SpriteSheetColor, RenderData> {
     public void Execute([ReadOnly] ref SpriteSheetColor color, ref RenderData renderData) {
-      renderData.color = color.value;
+      UnityEngine.Color col = color;
+      renderData.color = new float4(col.r, col.g, col.b, col.a);
     }
   }
 

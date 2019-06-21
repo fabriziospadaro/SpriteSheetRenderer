@@ -3,6 +3,7 @@ using Unity.Burst;
 using Unity.Jobs;
 using Unity.Collections;
 
+[DisableAutoCreation]
 public class SpriteSheetUvSystem : JobComponentSystem {
   [BurstCompile]
   struct SpriteSheetUvJob : IJobForEachWithEntity<RenderData, SpriteSheet> {

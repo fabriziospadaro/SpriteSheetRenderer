@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c87523ccd27b5014a8ecc87d4d3692a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spriteCount: 200000
+  spriteCount: 500000
   sprites:
   - {fileID: 6797741591340832258, guid: b69255563ed34ad46a892a322ceec4d8, type: 3}
   - {fileID: -5592356013027741539, guid: b69255563ed34ad46a892a322ceec4d8, type: 3}
@@ -217,10 +217,13 @@ MonoBehaviour:
   - {fileID: -3705341209193386819, guid: b69255563ed34ad46a892a322ceec4d8, type: 3}
   - {fileID: -8532015669230584892, guid: b69255563ed34ad46a892a322ceec4d8, type: 3}
   spawnArea:
-    x: 859.86
-    y: 476.7
-  minScale: 0.25
-  maxScale: 2
+    x: 554.7
+    y: 316.7
+  minScale: 0.5
+  maxScale: 5
+  minFPS_: 0.05
+  maxFPS_: 1.5
+  mat_: {fileID: 2100000, guid: 25e551e04c3b544338396991b11192f0, type: 2}
 --- !u!4 &46377964
 Transform:
   m_ObjectHideFlags: 0
@@ -229,7 +232,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 46377962}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.96, y: -12.1, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -301,7 +304,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 250
+  orthographic size: 162.8
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -325,7 +328,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 459258862}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.68, y: -12.18, z: -10}
+  m_LocalPosition: {x: 0, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

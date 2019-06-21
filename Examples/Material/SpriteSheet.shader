@@ -28,6 +28,8 @@
 
             StructuredBuffer<float4x2> matrixBuffer;
 			StructuredBuffer<float4> colorsBuffer;
+			StructuredBuffer<float2> uvBuffer;
+			StructuredBuffer<int> uvCellsBuffer;
 
             struct v2f{
                 float4 pos : SV_POSITION;
@@ -48,7 +50,7 @@
                 return ZMatrix;
             }
 
-            v2f vert (appdata_full v, uint instanceID : SV_InstanceID){
+            v2f vert (appdata_full v, uint instanceID : SV_InstanceID, uint vertexID : SV_VertexID){
                 //transform.xy = posizion x and y
                 //transform.z = rotation angle
                 //transform.w = scale
@@ -60,16 +62,15 @@
                 float3 worldPosition = float3(transform.x,transform.y,-transform.y/10) + (v.vertex.xyz * transform.w);
                 v2f o;
                 o.pos = UnityObjectToClipPos(float4(worldPosition, 1.0f));
-                o.uv =  v.texcoord * uv.xy + uv.zw;
+				o.uv = uvBuffer[uvCellsBuffer[instanceID] * 4 + vertexID];
 				o.color = colorsBuffer[instanceID];
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target{
-                fixed4 col = tex2D(_MainTex, i.uv) * i.color;
+				fixed4 col = tex2D(_MainTex, i.uv) *i.color;
 				clip(col.a - 1.0 / 255.0);
                 col.rgb *= col.a;
-
 				return col;
             }
 

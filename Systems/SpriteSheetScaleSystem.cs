@@ -4,6 +4,7 @@ using Unity.Jobs;
 using Unity.Collections;
 using Unity.Transforms;
 
+[DisableAutoCreation]
 public class SpriteSheetScaleSystem : JobComponentSystem {
   [BurstCompile]
   struct SpriteSheetScaleJob : IJobForEach<Scale, RenderData> {

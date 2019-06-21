@@ -4,6 +4,7 @@ using Unity.Burst;
 using Unity.Jobs;
 using Unity.Collections;
 
+[DisableAutoCreation]
 public class SpriteSheetPositionSystem : JobComponentSystem {
   [BurstCompile]
   struct SpriteSheetPositionJob : IJobForEach<Position2D, RenderData> {

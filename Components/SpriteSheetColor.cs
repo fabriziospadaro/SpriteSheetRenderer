@@ -6,5 +6,7 @@ using UnityEngine;
 
 [System.Serializable]
 public struct SpriteSheetColor : IComponentData {
-  public float4 value;
+  public Color value;
+  public static implicit operator Color(SpriteSheetColor c) => c.value;
+  public static implicit operator SpriteSheetColor(Color c) => new SpriteSheetColor { value = c };
 }

@@ -3,6 +3,7 @@ using Unity.Burst;
 using Unity.Jobs;
 using Unity.Collections;
 
+[DisableAutoCreation]
 public class SpriteSheetRotationSystem : JobComponentSystem {
   [BurstCompile]
   struct SpriteSheetRotationJob : IJobForEach<Rotation2D, RenderData> {
