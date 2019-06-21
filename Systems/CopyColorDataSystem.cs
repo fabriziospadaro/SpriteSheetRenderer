@@ -14,22 +14,15 @@ public class CopyColorDataSystem : RenderBufferSystem<ColorBuffer>
   EntityQuery sourceColors;
 
   [BurstCompile]
-  struct CopyColorData : IJob {
-    [ReadOnly]
+  struct CopyColors : IJobForEachWithEntity<SpriteSheetColor> {
     public Entity bufferEntity;
-
     public BufferFromEntity<ColorBuffer> bufferFromEntity;
-    [ReadOnly, DeallocateOnJobCompletion]
-    public NativeArray<SpriteSheetColor> colors;
 
-    public void Execute() {
+    public void Execute(Entity e, int index, [ReadOnly] ref SpriteSheetColor c0) {
       var buffer = bufferFromEntity[bufferEntity];
-      buffer.ResizeUninitialized(colors.Length);
-      for (int i = 0; i < colors.Length; i++)
-        buffer[i] = colors[i].value;
+      buffer[index] = c0.value;
     }
   }
-
 
   protected override void OnCreate() {
     base.OnCreate();
@@ -39,15 +32,14 @@ public class CopyColorDataSystem : RenderBufferSystem<ColorBuffer>
   protected override JobHandle PopulateBuffer(Entity bufferEntity, SpriteSheetMaterial filterMat, JobHandle inputDeps) {
 
     sourceColors.SetFilter(filterMat);
-    var colors = sourceColors.ToComponentDataArray < SpriteSheetColor>(Allocator.TempJob);
 
-    var copy = new CopyColorData {
+    EntityManager.GetBuffer<ColorBuffer>(bufferEntity).ResizeUninitialized(sourceColors.CalculateLength());
+    inputDeps = new CopyColors {
       bufferEntity = bufferEntity,
-      bufferFromEntity = GetBufferFromEntity<ColorBuffer>(false),
-      colors = colors
-    }.Schedule();
+      bufferFromEntity = GetBufferFromEntity<ColorBuffer>()
+    }.ScheduleSingle(sourceColors, inputDeps);
 
-    return JobHandle.CombineDependencies(inputDeps, copy);
+    return inputDeps;
   }
 
 }

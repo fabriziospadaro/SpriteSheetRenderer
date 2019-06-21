@@ -10,6 +10,7 @@ using UnityEngine;
 /// for each material (Shared Component Data). Ensures the render
 /// buffer entities stays in sync with our materials.
 /// </summary>
+[UpdateInGroup(typeof(InitializationSystemGroup))]
 [AlwaysUpdateSystem]
 public class GenerateRenderBuffersSystem : ComponentSystem {
   EntityArchetype bufferArchetype;

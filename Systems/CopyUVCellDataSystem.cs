@@ -12,18 +12,29 @@ using UnityEngine;
 public class CopyUVCellDataSystem : RenderBufferSystem<UVCellBuffer> {
   EntityQuery sourceQuery;
 
+  //[BurstCompile]
+  //struct CopyDataToRenderBuffer : IJob {
+  //  public Entity bufferEntity;
+  //  public BufferFromEntity<UVCellBuffer> bufferFromEntity;
+
+  //  [ReadOnly,DeallocateOnJobCompletion]
+  //  public NativeArray<UVCell> data;
+  //  public void Execute() {
+  //    var buffer = bufferFromEntity[bufferEntity];
+  //    buffer.ResizeUninitialized(data.Length);
+  //    for (int i = 0; i < data.Length; i++) 
+  //      buffer[i] = data[i].value;
+  //  }
+  //}
+
   [BurstCompile]
-  struct CopyDataToRenderBuffer : IJob {
+  struct CopyData : IJobForEachWithEntity<UVCell> {
     public Entity bufferEntity;
     public BufferFromEntity<UVCellBuffer> bufferFromEntity;
 
-    [ReadOnly,DeallocateOnJobCompletion]
-    public NativeArray<UVCell> data;
-    public void Execute() {
+    public void Execute(Entity e, int index, [ReadOnly] ref UVCell c) {
       var buffer = bufferFromEntity[bufferEntity];
-      buffer.ResizeUninitialized(data.Length);
-      for (int i = 0; i < data.Length; i++) 
-        buffer[i] = data[i].value;
+      buffer[index] = c.value;
     }
   }
 
@@ -34,15 +45,14 @@ public class CopyUVCellDataSystem : RenderBufferSystem<UVCellBuffer> {
 
   protected override JobHandle PopulateBuffer(Entity bufferEntity, SpriteSheetMaterial filterMat, JobHandle inputDeps) {
     sourceQuery.SetFilter(filterMat);
-    var sourceData = sourceQuery.ToComponentDataArray<UVCell>(Allocator.TempJob);
 
-    var copyJob = new CopyDataToRenderBuffer {
+    EntityManager.GetBuffer<UVCellBuffer>(bufferEntity).ResizeUninitialized(sourceQuery.CalculateLength());
+    inputDeps = new CopyData {
       bufferEntity = bufferEntity,
       bufferFromEntity = GetBufferFromEntity<UVCellBuffer>(false),
-      data = sourceData,
-    }.Schedule();
-    
-    return JobHandle.CombineDependencies(copyJob, inputDeps);
+    }.ScheduleSingle(sourceQuery, inputDeps);
+
+    return inputDeps;
   }
 
 }

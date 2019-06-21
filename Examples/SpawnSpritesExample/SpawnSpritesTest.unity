@@ -152,8 +152,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spriteCount: 350000
   spawnArea:
-    x: 554.7
-    y: 316.7
+    x: 1777.4
+    y: 1025
   minScale: 0.5
   maxScale: 5
   minFPS_: 0.05
@@ -239,7 +239,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 162.8
+  orthographic size: 512
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2

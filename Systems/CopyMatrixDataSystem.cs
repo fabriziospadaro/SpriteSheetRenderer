@@ -13,9 +13,8 @@ using UnityEngine;
 /// </summary>
 public class CopyMatrixDataSystem : RenderBufferSystem<MatrixBuffer>
 {
-  EntityQuery positions;
-  EntityQuery scales;
-  EntityQuery rotations;
+  EntityQuery boundsQuery;
+  EntityQuery trsQuery;
 
   JobHandle calcBoundsJob;
   NativeArray<float3> bounds;
@@ -54,38 +53,38 @@ public class CopyMatrixDataSystem : RenderBufferSystem<MatrixBuffer>
     }
   }
 
+
   // Note we can't use a parallel job here - Buffers don't support parallel writing.
   [BurstCompile]
-  struct CopyMatrixDataJob : IJob {
+  struct CopyMatrixDataJob : IJobForEachWithEntity<Position2D,Rotation2D,Scale> {
     [ReadOnly]
     public Entity bufferEntity;
     public BufferFromEntity<MatrixBuffer> bufferFromEntity;
-
-    [ReadOnly, DeallocateOnJobCompletion]
-    public NativeArray<Position2D> positions;
-    [ReadOnly, DeallocateOnJobCompletion]
-    public NativeArray<Rotation2D> rotations;
-    [ReadOnly, DeallocateOnJobCompletion]
-    public NativeArray<Scale> scales;
     
-    public void Execute() {
-      var buffer = bufferFromEntity[bufferEntity];
-      buffer.ResizeUninitialized(positions.Length);
-      for (int i = 0; i < positions.Length; i++) {
+    public void Execute(Entity e, int i, 
+      [ReadOnly] ref Position2D t, [ReadOnly] ref Rotation2D r, [ReadOnly] ref Scale s) {
+        var buffer = bufferFromEntity[bufferEntity];
         var matrix = buffer[i];
-        matrix.value.c0.xy = positions[i].Value;
-        matrix.value.c0.z = rotations[i].angle;
-        matrix.value.c0.w = scales[i].Value;
+        matrix.value.c0.xy = t.Value;
+        matrix.value.c0.z = r.angle;
+        matrix.value.c0.w = s.Value;
         buffer[i] = matrix;
-      }
     }
   }
 
   protected override void OnCreate() {
     base.OnCreate();
-    positions = GetEntityQuery(ComponentType.ReadOnly<Position2D>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
-    rotations = GetEntityQuery(ComponentType.ReadOnly<Rotation2D>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
-    scales = GetEntityQuery(ComponentType.ReadOnly<Scale>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
+    boundsQuery = GetEntityQuery(
+      ComponentType.ReadOnly<Position2D>(), 
+      ComponentType.ReadOnly<Scale>(), 
+      ComponentType.ReadOnly<SpriteSheetMaterial>());
+
+    trsQuery = GetEntityQuery(
+      ComponentType.ReadOnly<Position2D>(),
+      ComponentType.ReadOnly<Rotation2D>(),
+      ComponentType.ReadOnly<Scale>(),
+      ComponentType.ReadOnly<SpriteSheetMaterial>()
+      );
     bounds = new NativeArray<float3>(2, Allocator.Persistent);
   }
 
@@ -95,12 +94,9 @@ public class CopyMatrixDataSystem : RenderBufferSystem<MatrixBuffer>
   }
 
   protected override JobHandle OnUpdate(JobHandle inputDeps) {
-    positions.ResetFilter();
-    scales.ResetFilter();
-
     calcBoundsJob = new CalcBounds {
-      positions = positions.ToComponentDataArray<Position2D>(Allocator.TempJob),
-      scales = scales.ToComponentDataArray<Scale>(Allocator.TempJob),
+      positions = boundsQuery.ToComponentDataArray<Position2D>(Allocator.TempJob),
+      scales = boundsQuery.ToComponentDataArray<Scale>(Allocator.TempJob),
       bounds = bounds,
     }.Schedule();
     inputDeps = JobHandle.CombineDependencies(inputDeps, calcBoundsJob);
@@ -109,41 +105,14 @@ public class CopyMatrixDataSystem : RenderBufferSystem<MatrixBuffer>
   }
 
   protected override JobHandle PopulateBuffer(Entity bufferEntity, SpriteSheetMaterial filterMat, JobHandle inputDeps) {
-    NativeArray<Position2D> posData;
-    NativeArray<Rotation2D> rotData;
-    NativeArray<Scale> scaleData;
-
-    positions.SetFilter(filterMat);
-    int positionsCount = positions.CalculateLength();
-    if (positionsCount == 0)
-      return inputDeps;
-    posData = positions.ToComponentDataArray<Position2D>(Allocator.TempJob);
-
-    // Account for the possiblity that rotation or scale systems are disabled. If so, we set sensible
-    // defaults so we still get visible sprites.
-    rotations.SetFilter(filterMat);
-    int rotCount = rotations.CalculateLength();
-    if (rotCount != positionsCount)
-      Initialize(out rotData, positionsCount, new Rotation2D { angle = 0 });
-    else
-      rotData = rotations.ToComponentDataArray<Rotation2D>(Allocator.TempJob);
-
-    scales.SetFilter(filterMat);
-    int scalesCount = scales.CalculateLength();
-    if (scalesCount != positionsCount)
-      Initialize(out scaleData, positionsCount, new Scale { Value = 1 });
-    else
-      scaleData = scales.ToComponentDataArray<Scale>(Allocator.TempJob);
-    
-    var copyJob = new CopyMatrixDataJob {
+    trsQuery.SetFilter(filterMat);
+    EntityManager.GetBuffer<MatrixBuffer>(bufferEntity).ResizeUninitialized(trsQuery.CalculateLength());
+    inputDeps = new CopyMatrixDataJob {
       bufferEntity = bufferEntity,
       bufferFromEntity = GetBufferFromEntity<MatrixBuffer>(false),
-      positions = posData,
-      rotations = rotData,
-      scales = scaleData,
-    }.Schedule();
+    }.ScheduleSingle(trsQuery, inputDeps);
 
-    return JobHandle.CombineDependencies(inputDeps, copyJob);
+    return inputDeps;
   }
 
   void Initialize<T>(out NativeArray<T> arr, int len, T val) where T : struct, IComponentData {

@@ -4,6 +4,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
+[UpdateBefore(typeof(CopyUVCellDataSystem))]
 public class SpriteAnimationSystem : JobComponentSystem {
 
   struct AnimationJob : IJobForEach<SpriteSheetAnimation, UVCell> {
