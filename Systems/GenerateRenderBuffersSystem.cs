@@ -5,6 +5,11 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
+/// <summary>
+/// Generates our render buffer entities. We generate one entity
+/// for each material (Shared Component Data). Ensures the render
+/// buffer entities stays in sync with our materials.
+/// </summary>
 [AlwaysUpdateSystem]
 public class GenerateRenderBuffersSystem : ComponentSystem {
   EntityArchetype bufferArchetype;
@@ -19,8 +24,8 @@ public class GenerateRenderBuffersSystem : ComponentSystem {
 
   protected override void OnUpdate() {
     sharedMaterials.Clear();
-    EntityManager.GetAllUniqueSharedComponentData<SpriteSheetMaterial>(sharedMaterials);
-    // Ignore null
+    EntityManager.GetAllUniqueSharedComponentData(sharedMaterials);
+    // Ignore default ( null material )
     sharedMaterials.RemoveAt(0);
 
     int bufferCount = bufferQuery.CalculateLength();

@@ -7,7 +7,8 @@ using Unity.Jobs;
 using UnityEngine;
 
 [DisableAutoCreation]
-public class CopyPosDataSystem : BufferDataSystem<PosBuffer> {
+// Started to split out TRS data to separate buffers. Not used yet.
+public class CopyPosDataSystem : RenderBufferSystem<PosBuffer> {
   EntityQuery positions;
 
   [BurstCompile]

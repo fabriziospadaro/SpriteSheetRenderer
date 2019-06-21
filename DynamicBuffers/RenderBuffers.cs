@@ -30,7 +30,3 @@ public struct UVCellBuffer : IBufferElementData {
   public static implicit operator int(UVCellBuffer v) => v.value;
   public static implicit operator UVCellBuffer(int v) => new UVCellBuffer { value = v };
 }
-
-public struct AnimationBuffer : IBufferElementData {
-
-}

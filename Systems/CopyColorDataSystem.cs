@@ -6,7 +6,10 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
-public class CopyColorDataSystem : BufferDataSystem<ColorBuffer>
+/// <summary>
+/// Copy color data to the render buffer.
+/// </summary>
+public class CopyColorDataSystem : RenderBufferSystem<ColorBuffer>
 {
   EntityQuery sourceColors;
 
@@ -16,16 +19,17 @@ public class CopyColorDataSystem : BufferDataSystem<ColorBuffer>
     public Entity bufferEntity;
 
     public BufferFromEntity<ColorBuffer> bufferFromEntity;
-
     [ReadOnly, DeallocateOnJobCompletion]
     public NativeArray<SpriteSheetColor> colors;
 
     public void Execute() {
       var buffer = bufferFromEntity[bufferEntity];
+      buffer.ResizeUninitialized(colors.Length);
       for (int i = 0; i < colors.Length; i++)
         buffer[i] = colors[i].value;
     }
   }
+
 
   protected override void OnCreate() {
     base.OnCreate();
@@ -35,21 +39,15 @@ public class CopyColorDataSystem : BufferDataSystem<ColorBuffer>
   protected override JobHandle PopulateBuffer(Entity bufferEntity, SpriteSheetMaterial filterMat, JobHandle inputDeps) {
 
     sourceColors.SetFilter(filterMat);
-    int colorsCount = sourceColors.CalculateLength();
+    var colors = sourceColors.ToComponentDataArray < SpriteSheetColor>(Allocator.TempJob);
 
-    var buffer = EntityManager.GetBuffer<ColorBuffer>(bufferEntity);
-    if (buffer.Length != colorsCount)
-      buffer.ResizeUninitialized(colorsCount);
-
-    var colors = sourceColors.ToComponentDataArray<SpriteSheetColor>(Allocator.TempJob);
-
-    var copyJob = new CopyColorData {
+    var copy = new CopyColorData {
       bufferEntity = bufferEntity,
       bufferFromEntity = GetBufferFromEntity<ColorBuffer>(false),
       colors = colors
     }.Schedule();
-    
-    return JobHandle.CombineDependencies(inputDeps, copyJob);
+
+    return JobHandle.CombineDependencies(inputDeps, copy);
   }
 
 }

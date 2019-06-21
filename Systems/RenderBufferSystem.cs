@@ -6,7 +6,11 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Burst;
 
-public abstract class BufferDataSystem<BufferDataT> : JobComponentSystem
+/// <summary>
+/// Base class for systems that want to fill render buffers from
+/// component data.
+/// </summary>
+public abstract class RenderBufferSystem<BufferDataT> : JobComponentSystem
   where BufferDataT : struct, IBufferElementData {
 
   static List<SpriteSheetMaterial> sharedMaterials = new List<SpriteSheetMaterial>();
@@ -34,6 +38,7 @@ public abstract class BufferDataSystem<BufferDataT> : JobComponentSystem
 
   protected override JobHandle OnUpdate(JobHandle inputDeps) {
     // Ensure our buffer entities have their dynamic buffers attached
+    // Buffers are initialized from GenerateRenderBuffersSystem
     using (var entities = uninitializedBuffers.ToEntityArray(Allocator.TempJob)) {
       for (int i = 0; i < entities.Length; ++i)
         EntityManager.AddBuffer<BufferDataT>(entities[i]);
@@ -51,6 +56,7 @@ public abstract class BufferDataSystem<BufferDataT> : JobComponentSystem
       initializedBuffers.SetFilter(mat);
       var bufferEntity = initializedBuffers.GetSingletonEntity();
 
+      // Derived classes can fill the buffer here
       inputDeps = PopulateBuffer(bufferEntity, mat, inputDeps);
     }
 

@@ -3,6 +3,14 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
+/// <summary>
+/// Maintains a runtime cache of the uvs for a given material.
+/// The sprites need to be set up with unity's sprite asset editor.
+/// The textures attached to any passed in materials need to be 
+/// in the root of a Resources folder.
+/// TODO: Different way to access the texture that doesn't use the 
+/// dumb Resources folder. Addressables maybe?
+/// </summary>
 public class CachedUVData
 {
   Texture targetTexture = null;
@@ -33,9 +41,9 @@ public class CachedUVData
   
   static CachedUVData GetCachedUVData(Material mat) {
     CachedUVData data;
-    if (!uvData.TryGetValue(mat, out data)) {
+    if (!uvData.TryGetValue(mat, out data)) 
       uvData[mat] = data = new CachedUVData(mat.mainTexture);
-    }
+
     if (mat.mainTexture != data.TargetTexture_)
       data.BuildFromTexture(mat.mainTexture);
 

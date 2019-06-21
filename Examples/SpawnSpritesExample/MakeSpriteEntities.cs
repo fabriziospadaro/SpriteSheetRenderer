@@ -12,9 +12,6 @@ namespace ECSSpriteSheetAnimation.Examples {
     int spriteCount = 5000;
 
     [SerializeField]
-    Sprite[] sprites;
-
-    [SerializeField]
     float2 spawnArea = new float2(100, 100);
     [SerializeField]
     float minScale = .25f;
@@ -28,9 +25,7 @@ namespace ECSSpriteSheetAnimation.Examples {
     float maxFPS_ = 1.5f;
 
     [SerializeField]
-    Material mat_;
-    
-
+    Material mat_ = null;
 
     Rect GetSpawnArea() {
       Rect r = new Rect(0, 0, spawnArea.x, spawnArea.y);
@@ -43,21 +38,16 @@ namespace ECSSpriteSheetAnimation.Examples {
          typeof(Position2D),
          typeof(Rotation2D),
          typeof(Scale),
-         //typeof(Bound2D),
-         typeof(SpriteSheet),
          typeof(SpriteSheetAnimation),
          typeof(SpriteSheetMaterial),
-         typeof(UvBuffer),
          typeof(SpriteSheetColor),
-         typeof(RenderData),
          typeof(UVCell)
       );
 
       NativeArray<Entity> entities = new NativeArray<Entity>(spriteCount, Allocator.Temp);
       eManager.CreateEntity(archetype, entities);
 
-      KeyValuePair<Material, float4[]> atlasData = SpriteSheetCache.BakeSprites(sprites);
-      int cellCount = atlasData.Value.Length;
+      int cellCount = CachedUVData.GetCellCount(mat_);
 
       Random rand = new Random((uint)UnityEngine.Random.Range(0, int.MaxValue));
       Rect area = GetSpawnArea();
@@ -66,8 +56,7 @@ namespace ECSSpriteSheetAnimation.Examples {
       for (int i = 0; i < entities.Length; i++) {
         Entity e = entities[i];
 
-
-        SpriteSheet sheet = new SpriteSheet { spriteIndex = rand.NextInt(0, cellCount), maxSprites = cellCount };
+        
         Scale scale = new Scale { Value = rand.NextFloat(minScale, maxScale) };
         Position2D pos = new Position2D { Value = rand.NextFloat2(area.min, area.max) };
         int numFrames = rand.NextInt(3, maxFrames / 2);
@@ -76,20 +65,14 @@ namespace ECSSpriteSheetAnimation.Examples {
           play = true, repetition = SpriteSheetAnimation.RepetitionType.Loop, fps = rand.NextFloat(minFPS_,maxFPS_),
           frameMin = minFrame, frameMax = minFrame + numFrames };
         SpriteSheetColor color = UnityEngine.Random.ColorHSV(.35f, .75f);
-        UVCell cell = new UVCell { value = rand.NextInt(0, CachedUVData.GetCellCount(mat_)) };
-
-        eManager.SetComponentData(e, sheet);
+        UVCell cell = new UVCell { value = rand.NextInt(0, maxFrames) };
+        
         eManager.SetComponentData(e, scale);
         eManager.SetComponentData(e, pos);
         eManager.SetComponentData(e, anim);
         eManager.SetComponentData(e, color);
         eManager.SetComponentData(e, cell);
         eManager.SetSharedComponentData(e, material);
-
-        // Fill uv buffer
-        var buffer = eManager.GetBuffer<UvBuffer>(entities[i]);
-        for(int j = 0; j < atlasData.Value.Length; j++)
-          buffer.Add(atlasData.Value[j]);
 
       }
     }

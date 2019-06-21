@@ -6,7 +6,10 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
-public class CopyUVCellDataSystem : BufferDataSystem<UVCellBuffer> {
+/// <summary>
+/// Copy uv cell data to the render buffer.
+/// </summary>
+public class CopyUVCellDataSystem : RenderBufferSystem<UVCellBuffer> {
   EntityQuery sourceQuery;
 
   [BurstCompile]
@@ -18,6 +21,7 @@ public class CopyUVCellDataSystem : BufferDataSystem<UVCellBuffer> {
     public NativeArray<UVCell> data;
     public void Execute() {
       var buffer = bufferFromEntity[bufferEntity];
+      buffer.ResizeUninitialized(data.Length);
       for (int i = 0; i < data.Length; i++) 
         buffer[i] = data[i].value;
     }
@@ -31,10 +35,6 @@ public class CopyUVCellDataSystem : BufferDataSystem<UVCellBuffer> {
   protected override JobHandle PopulateBuffer(Entity bufferEntity, SpriteSheetMaterial filterMat, JobHandle inputDeps) {
     sourceQuery.SetFilter(filterMat);
     var sourceData = sourceQuery.ToComponentDataArray<UVCell>(Allocator.TempJob);
-
-    var buffer = EntityManager.GetBuffer<UVCellBuffer>(bufferEntity);
-    if (buffer.Length != sourceData.Length)
-      buffer.ResizeUninitialized(sourceData.Length);
 
     var copyJob = new CopyDataToRenderBuffer {
       bufferEntity = bufferEntity,
