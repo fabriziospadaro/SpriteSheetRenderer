@@ -3,11 +3,10 @@ using Unity.Burst;
 using Unity.Jobs;
 using Unity.Collections;
 
-[UpdateAfter(typeof(SpriteSheetAnimationSystem))]
 public class SpriteSheetColorSystem : JobComponentSystem {
   [BurstCompile]
   struct SpriteSheetColorJob : IJobForEach<SpriteSheetColor, RenderData> {
-    public void Execute([ReadOnly] ref SpriteSheetColor color, ref RenderData renderData) {
+    public void Execute([ReadOnly][ChangedFilter] ref SpriteSheetColor color, ref RenderData renderData) {
       renderData.color = color.value;
     }
   }

@@ -217,7 +217,7 @@ MonoBehaviour:
   - {fileID: -3705341209193386819, guid: b69255563ed34ad46a892a322ceec4d8, type: 3}
   - {fileID: -8532015669230584892, guid: b69255563ed34ad46a892a322ceec4d8, type: 3}
   spawnArea:
-    x: 859.86
+    x: 1270.33
     y: 476.7
   minScale: 0.25
   maxScale: 2

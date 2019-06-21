@@ -7,7 +7,7 @@ public class SpriteSheetUvSystem : JobComponentSystem {
   [BurstCompile]
   struct SpriteSheetUvJob : IJobForEachWithEntity<RenderData, SpriteSheet> {
     [ReadOnly] public BufferFromEntity<UvBuffer> lookup;
-    public void Execute(Entity entity, int index, ref RenderData renderData, [ReadOnly]ref SpriteSheet spriteSheet) {
+    public void Execute(Entity entity, int index, ref RenderData renderData, [ReadOnly][ChangedFilter]ref SpriteSheet spriteSheet) {
       renderData.matrix.c1 = lookup[entity][spriteSheet.spriteIndex].uv;
     }
   }
