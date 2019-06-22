@@ -1,6 +1,7 @@
  Shader "Instanced/SpriteSheet" {
     Properties {
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
+		_PivotOffset ("Pivot Offset", Float ) = 0.5
     }
     
     SubShader {
@@ -25,11 +26,17 @@
             #include "UnityCG.cginc"
 
             sampler2D _MainTex;
+			float _PivotOffset;
 
-            StructuredBuffer<float4x2> matrixBuffer;
+            StructuredBuffer<float4x2> transformBuffer;
 			StructuredBuffer<float4> colorsBuffer;
 			StructuredBuffer<float2> uvBuffer;
 			StructuredBuffer<int> uvCellsBuffer;
+
+
+			struct appdata_t {
+				float4 vertex : POSITION;
+			};
 
             struct v2f{
                 float4 pos : SV_POSITION;
@@ -50,27 +57,37 @@
                 return ZMatrix;
             }
 
-            v2f vert (appdata_full v, uint instanceID : SV_InstanceID, uint vertexID : SV_VertexID){
+            v2f vert (appdata_t i, uint instanceID : SV_InstanceID, uint vertexID : SV_VertexID){
+
                 //transform.xy = posizion x and y
                 //transform.z = rotation angle
                 //transform.w = scale
-                float4 transform = float4(matrixBuffer[instanceID][0].x,matrixBuffer[instanceID][1].x,matrixBuffer[instanceID][2].x,matrixBuffer[instanceID][3].x);
-                float4 uv = float4(matrixBuffer[instanceID][0].y,matrixBuffer[instanceID][1].y,matrixBuffer[instanceID][2].y,matrixBuffer[instanceID][3].y);
-                //rotate the vertex
-                v.vertex = mul(v.vertex-float4(0.5,0.5,0,0),rotationZMatrix(transform.z));
-                //scale it
-                float3 worldPosition = float3(transform.x,transform.y,-transform.y/10) + (v.vertex.xyz * transform.w);
-                v2f o;
-                o.pos = UnityObjectToClipPos(float4(worldPosition, 1.0f));
+  
+				float4x2 t = transformBuffer[instanceID];
+				float4 transform = float4(t[0].x, t[1].x, t[2].x, t[3].x);
+				float4 vert = i.vertex;
+
+				float pivotOffset = _PivotOffset;
+				vert.xy -= pivotOffset;
+                vert = mul(vert,rotationZMatrix(transform.z));
+				vert.xy += pivotOffset;
+
+                //scale it	
+				vert.xy = vert.xy * transform.w;
+				vert.z = 1;
+				
+				v2f o;
+				o.pos = UnityObjectToClipPos(float4(vert.xyz + transform.xyz, 1.0f));
 				o.uv = uvBuffer[uvCellsBuffer[instanceID] * 4 + vertexID];
 				o.color = colorsBuffer[instanceID];
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target{
-				fixed4 col = tex2D(_MainTex, i.uv) *i.color;
-				clip(col.a - 1.0 / 255.0);
+				fixed4 col = tex2D(_MainTex, i.uv) * i.color;
                 col.rgb *= col.a;
+
+				clip(col.a - 1.0 / 255.0);
 				return col;
             }
 
