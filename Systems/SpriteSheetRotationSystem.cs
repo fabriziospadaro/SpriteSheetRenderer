@@ -7,7 +7,7 @@ public class SpriteSheetRotationSystem : JobComponentSystem {
   [BurstCompile]
   struct SpriteSheetRotationJob : IJobForEach<Rotation2D, RenderData> {
     public void Execute([ReadOnly][ChangedFilter] ref Rotation2D rotation, ref RenderData renderData) {
-      renderData.matrix.c0.z = rotation.angle;
+      renderData.matrix.z = rotation.angle;
     }
   }
 

@@ -5,14 +5,14 @@ using UnityEngine;
 
 public class SpriteSheetAnimationSystem : JobComponentSystem {
   [BurstCompile]
-  struct SpriteSheetAnimationJob : IJobForEach<SpriteSheetAnimation, SpriteSheet> {
+  struct SpriteSheetAnimationJob : IJobForEach<SpriteSheetAnimation, SpriteIndex> {
 
-    public void Execute(ref SpriteSheetAnimation AnimCmp, ref SpriteSheet spriteSheetCmp) {
+    public void Execute(ref SpriteSheetAnimation AnimCmp, ref SpriteIndex spriteSheetCmp) {
       if(AnimCmp.play && AnimCmp.elapsedFrames % AnimCmp.samples == 0 && AnimCmp.elapsedFrames != 0) {
         switch(AnimCmp.repetition) {
           case SpriteSheetAnimation.RepetitionType.Once:
-            if(!NextWillReachEnd(spriteSheetCmp)) {
-              spriteSheetCmp.spriteIndex += 1;
+            if(!NextWillReachEnd(AnimCmp, spriteSheetCmp)) {
+              spriteSheetCmp.Value += 1;
             }
             else {
               AnimCmp.play = false;
@@ -20,10 +20,10 @@ public class SpriteSheetAnimationSystem : JobComponentSystem {
             }
             break;
           case SpriteSheetAnimation.RepetitionType.Loop:
-            if(NextWillReachEnd(spriteSheetCmp))
-              spriteSheetCmp.spriteIndex = 0;
+            if(NextWillReachEnd(AnimCmp, spriteSheetCmp))
+              spriteSheetCmp.Value = 0;
             else
-              spriteSheetCmp.spriteIndex += 1;
+              spriteSheetCmp.Value += 1;
             break;
         }
         AnimCmp.elapsedFrames = 0;
@@ -32,8 +32,8 @@ public class SpriteSheetAnimationSystem : JobComponentSystem {
         AnimCmp.elapsedFrames += 1;
       }
     }
-    public bool NextWillReachEnd(SpriteSheet sprite) {
-      return sprite.spriteIndex + 1 >= sprite.maxSprites;
+    public bool NextWillReachEnd(SpriteSheetAnimation anim, SpriteIndex sprite) {
+      return sprite.Value + 1 >= anim.maxSprites;
     }
   }
 

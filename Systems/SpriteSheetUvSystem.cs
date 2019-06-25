@@ -1,20 +1,47 @@
-﻿using Unity.Entities;
+﻿using System.Collections;
+using System.Collections.Generic;
 using Unity.Burst;
-using Unity.Jobs;
 using Unity.Collections;
+using Unity.Entities;
+using Unity.Jobs;
+using UnityEngine;
 
-public class SpriteSheetUvSystem : JobComponentSystem {
+public class SpriteSheetUvSystem : ComponentSystem {
+  Entity indexBufferEntity;
+  EntityQuery indexQuery;
+  private readonly ComponentType cmpTypeB = ComponentType.ReadOnly<SpriteIndex>();
+  //todo menage multiple materials
+  protected override void OnCreate() {
+    indexBufferEntity = EntityManager.CreateEntity(typeof(SpriteIndexBuffer));
+    indexQuery = GetEntityQuery(cmpTypeB);
+  }
+  //todo menage destruction of buffers
   [BurstCompile]
-  struct SpriteSheetUvJob : IJobForEachWithEntity<RenderData, SpriteSheet> {
-    [ReadOnly] public BufferFromEntity<UvBuffer> lookup;
-    public void Execute(Entity entity, int index, ref RenderData renderData, [ReadOnly][ChangedFilter]ref SpriteSheet spriteSheet) {
-      renderData.matrix.c1 = lookup[entity][spriteSheet.spriteIndex].uv;
+  struct UpdateJob : IJob {
+    [NativeDisableParallelForRestriction]
+    public DynamicBuffer<SpriteIndexBuffer> indexBuffer;
+    [DeallocateOnJobCompletion]
+    [ReadOnly]
+    public NativeArray<SpriteIndex> data;
+    public void Execute() {
+      int bufferSize = indexBuffer.Length;
+      for(int i = 0; i < data.Length; i++) {
+        if(i >= bufferSize)
+          indexBuffer.Add(data[i].Value);
+        else
+          indexBuffer[i] = data[i].Value;
+      }
     }
   }
 
-  protected override JobHandle OnUpdate(JobHandle inputDeps) {
-    var lookup = GetBufferFromEntity<UvBuffer>();
-    var job = new SpriteSheetUvJob() { lookup = lookup };
-    return job.Schedule(this, inputDeps);
+  protected override void OnUpdate() {
+    indexQuery.SetFilterChanged(cmpTypeB);
+    DynamicBuffer<SpriteIndexBuffer> matrixbuffer = EntityManager.GetBuffer<SpriteIndexBuffer>(indexBufferEntity);
+    NativeArray<SpriteIndex> data = indexQuery.ToComponentDataArray<SpriteIndex>(Allocator.TempJob);
+    var job = new UpdateJob() {
+      indexBuffer = matrixbuffer,
+      data = data
+    };
+    job.Schedule().Complete();
   }
 }

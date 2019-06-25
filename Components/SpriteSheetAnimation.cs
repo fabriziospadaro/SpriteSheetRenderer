@@ -7,4 +7,5 @@ public struct SpriteSheetAnimation : IComponentData {
   //how many frames does this animation takes to move to the next sprite
   public int samples;
   public bool play;
+  public int maxSprites;
 }
