@@ -4,6 +4,8 @@ class RenderInformation {
   public ComputeBuffer matrixBuffer;
   public ComputeBuffer argsBuffer;
   public ComputeBuffer colorsBuffer;
+  public ComputeBuffer uvBuffer;
+  public ComputeBuffer indexBuffer;
   public Material material;
   public uint[] args;
 
@@ -25,8 +27,16 @@ class RenderInformation {
       argsBuffer.Release();
     argsBuffer = null;
 
-    if (colorsBuffer != null)
-        colorsBuffer.Release();
+    if(colorsBuffer != null)
+      colorsBuffer.Release();
     colorsBuffer = null;
+
+    if(uvBuffer != null)
+      uvBuffer.Release();
+    uvBuffer = null;
+
+    if(indexBuffer != null)
+      indexBuffer.Release();
+    indexBuffer = null;
   }
 }

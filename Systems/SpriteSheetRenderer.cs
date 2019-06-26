@@ -19,8 +19,6 @@ public class SpriteSheetRenderer : ComponentSystem {
 
   int shaderPropertyId;
   bool initialize = false;
-  ComputeBuffer uvBuffer;
-  ComputeBuffer indexBuffer;
   protected override void OnCreate() {
     shaderPropertyId = Shader.PropertyToID("_MainText_UV");
     processable = GetEntityQuery(ComponentType.ReadOnly<RenderData>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
@@ -61,6 +59,10 @@ public class SpriteSheetRenderer : ComponentSystem {
       renderInfos[bufferID].matrixBuffer.Release();
     if(renderInfos[bufferID].colorsBuffer != null)
       renderInfos[bufferID].colorsBuffer.Release();
+    if(renderInfos[bufferID].uvBuffer != null)
+      renderInfos[bufferID].uvBuffer.Release();
+    if(renderInfos[bufferID].indexBuffer != null)
+      renderInfos[bufferID].indexBuffer.Release();
   }
 
   int UpdateBuffers(int renderIndex) {
@@ -72,19 +74,15 @@ public class SpriteSheetRenderer : ComponentSystem {
 
     int instanceCount = EntityManager.GetBuffer<MatrixBuffer>(matrixBufferQuery.GetSingletonEntity()).Length;
     if(instanceCount > 0) {
-      if(uvBuffer != null)
-        uvBuffer.Release();
 
-      uvBuffer = new ComputeBuffer(instanceCount, 16);
-      uvBuffer.SetData(EntityManager.GetBuffer<UvBuffer>(uvBufferQuery.GetSingletonEntity()).Reinterpret<float4>().AsNativeArray());
-      renderInfos[renderIndex].material.SetBuffer("uvBuffer", uvBuffer);
+      renderInfos[renderIndex].uvBuffer = new ComputeBuffer(instanceCount, 16);
+      renderInfos[renderIndex].uvBuffer.SetData(EntityManager.GetBuffer<UvBuffer>(uvBufferQuery.GetSingletonEntity()).Reinterpret<float4>().AsNativeArray());
+      renderInfos[renderIndex].material.SetBuffer("uvBuffer", renderInfos[renderIndex].uvBuffer);
 
-      if(indexBuffer != null)
-        indexBuffer.Release();
 
-      indexBuffer = new ComputeBuffer(instanceCount, sizeof(int));
-      indexBuffer.SetData(EntityManager.GetBuffer<SpriteIndexBuffer>(indexBufferQuery.GetSingletonEntity()).Reinterpret<int>().AsNativeArray());
-      renderInfos[renderIndex].material.SetBuffer("indexBuffer", indexBuffer);
+      renderInfos[renderIndex].indexBuffer = new ComputeBuffer(instanceCount, sizeof(int));
+      renderInfos[renderIndex].indexBuffer.SetData(EntityManager.GetBuffer<SpriteIndexBuffer>(indexBufferQuery.GetSingletonEntity()).Reinterpret<int>().AsNativeArray());
+      renderInfos[renderIndex].material.SetBuffer("indexBuffer", renderInfos[renderIndex].indexBuffer);
 
       renderInfos[renderIndex].matrixBuffer = new ComputeBuffer(instanceCount, 16);
       renderInfos[renderIndex].matrixBuffer.SetData(EntityManager.GetBuffer<MatrixBuffer>(matrixBufferQuery.GetSingletonEntity()).Reinterpret<float4>().AsNativeArray());

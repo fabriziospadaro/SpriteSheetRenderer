@@ -51,20 +51,23 @@ namespace ECSSpriteSheetAnimation.Examples {
       SpriteSheetMaterial material = new SpriteSheetMaterial { material = atlasData.Key };
       for(int i = 0; i < entities.Length; i++) {
         Entity e = entities[i];
-        SpriteIndex sheet = new SpriteIndex { Value = rand.NextInt(0, cellCount) };
+        SpriteIndex sheet = new SpriteIndex { Value = rand.NextInt(0, cellCount), bufferID = i };
         Scale scale = new Scale { Value = rand.NextFloat(minScale, maxScale) };
         Position2D pos = new Position2D { Value = rand.NextFloat2(area.min, area.max) };
         SpriteSheetAnimation anim = new SpriteSheetAnimation { maxSprites = cellCount, play = true, repetition = SpriteSheetAnimation.RepetitionType.Loop, samples = 10 };
         var color = UnityEngine.Random.ColorHSV(.15f, .75f);
-        SpriteSheetColor col = new SpriteSheetColor { color = new float4(color.r, color.g, color.b, color.a) };
+        SpriteSheetColor col = new SpriteSheetColor { color = new float4(color.r, color.g, color.b, color.a), bufferID = i };
         eManager.SetComponentData(e, sheet);
         eManager.SetComponentData(e, scale);
         eManager.SetComponentData(e, pos);
+        eManager.SetComponentData(e, new RenderData { bufferID = i });
         eManager.SetComponentData(e, anim);
         eManager.SetComponentData(e, col);
         eManager.SetSharedComponentData(e, material);
       }
-      DynamicBufferManager.BakeUvBuffer(eManager, material, atlasData);
+      DynamicBufferManager.manager = eManager;
+      DynamicBufferManager.BakeUvBuffer(material, atlasData);
+      DynamicBufferManager.GenerateBuffers(material, entities.Length);
     }
 
     private void OnDrawGizmosSelected() {

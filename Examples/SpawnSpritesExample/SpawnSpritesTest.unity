@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c87523ccd27b5014a8ecc87d4d3692a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spriteCount: 500000
+  spriteCount: 1024
   sprites:
   - {fileID: 6797741591340832258, guid: b69255563ed34ad46a892a322ceec4d8, type: 3}
   - {fileID: -5592356013027741539, guid: b69255563ed34ad46a892a322ceec4d8, type: 3}

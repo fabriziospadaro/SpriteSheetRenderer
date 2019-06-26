@@ -3,4 +3,5 @@ using Unity.Mathematics;
 
 public struct SpriteIndex : IComponentData {
   public int Value;
+  public int bufferID;
 }

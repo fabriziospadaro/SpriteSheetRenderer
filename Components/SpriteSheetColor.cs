@@ -4,4 +4,5 @@ using UnityEngine;
 
 public struct SpriteSheetColor : IComponentData {
   public float4 color;
+  public int bufferID;
 }

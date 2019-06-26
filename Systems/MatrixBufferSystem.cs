@@ -7,12 +7,10 @@ using Unity.Jobs;
 using UnityEngine;
 
 public class MatrixBufferSystem : ComponentSystem {
-  Entity colorBufferEntity;
   EntityQuery matrixQuery;
   private readonly ComponentType cmpTypeB = ComponentType.ReadOnly<RenderData>();
   //todo menage multiple materials
   protected override void OnCreate() {
-    colorBufferEntity = EntityManager.CreateEntity(typeof(MatrixBuffer));
     matrixQuery = GetEntityQuery(cmpTypeB);
   }
   //todo menage destruction of buffers
@@ -24,22 +22,16 @@ public class MatrixBufferSystem : ComponentSystem {
     [ReadOnly]
     public NativeArray<RenderData> data;
     public void Execute() {
-      int bufferSize = matrixBuffer.Length;
-      for(int i = 0; i < data.Length; i++) {
-        if(i >= bufferSize)
-          matrixBuffer.Add(data[i].matrix);
-        else
-          matrixBuffer[i] = data[i].matrix;
-      }
+      for(int i = 0; i < data.Length; i++)
+        matrixBuffer[data[i].bufferID] = data[i].matrix;
     }
   }
 
   protected override void OnUpdate() {
     matrixQuery.SetFilterChanged(cmpTypeB);
-    DynamicBuffer<MatrixBuffer> matrixbuffer = EntityManager.GetBuffer<MatrixBuffer>(colorBufferEntity);
     NativeArray<RenderData> data = matrixQuery.ToComponentDataArray<RenderData>(Allocator.TempJob);
     var job = new UpdateJob() {
-      matrixBuffer = matrixbuffer,
+      matrixBuffer = DynamicBufferManager.GetMatrixBuffer(),
       data = data
     };
     job.Schedule().Complete();
