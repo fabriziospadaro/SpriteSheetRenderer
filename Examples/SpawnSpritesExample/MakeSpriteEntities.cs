@@ -5,9 +5,8 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 using Random = Unity.Mathematics.Random;
-using UnityEngine.U2D;
 namespace ECSSpriteSheetAnimation.Examples {
-  public class MakeSpriteEntities : UnityEngine.MonoBehaviour, IConvertGameObjectToEntity {
+  public class MakeSpriteEntities : MonoBehaviour, IConvertGameObjectToEntity {
     [SerializeField]
     int spriteCount = 5000;
 
@@ -37,7 +36,8 @@ namespace ECSSpriteSheetAnimation.Examples {
          typeof(SpriteSheetAnimation),
          typeof(SpriteSheetMaterial),
          typeof(SpriteSheetColor),
-         typeof(RenderData)
+         typeof(RenderData),
+         typeof(BufferHook)
       );
 
       NativeArray<Entity> entities = new NativeArray<Entity>(spriteCount, Allocator.Temp);
@@ -51,18 +51,18 @@ namespace ECSSpriteSheetAnimation.Examples {
       SpriteSheetMaterial material = new SpriteSheetMaterial { material = atlasData.Key };
       for(int i = 0; i < entities.Length; i++) {
         Entity e = entities[i];
-        SpriteIndex sheet = new SpriteIndex { Value = rand.NextInt(0, cellCount), bufferID = i };
+        SpriteIndex sheet = new SpriteIndex { Value = rand.NextInt(0, cellCount) };
         Scale scale = new Scale { Value = rand.NextFloat(minScale, maxScale) };
         Position2D pos = new Position2D { Value = rand.NextFloat2(area.min, area.max) };
         SpriteSheetAnimation anim = new SpriteSheetAnimation { maxSprites = cellCount, play = true, repetition = SpriteSheetAnimation.RepetitionType.Loop, samples = 10 };
         var color = UnityEngine.Random.ColorHSV(.15f, .75f);
-        SpriteSheetColor col = new SpriteSheetColor { color = new float4(color.r, color.g, color.b, color.a), bufferID = i };
+        SpriteSheetColor col = new SpriteSheetColor { color = new float4(color.r, color.g, color.b, color.a) };
         eManager.SetComponentData(e, sheet);
         eManager.SetComponentData(e, scale);
         eManager.SetComponentData(e, pos);
-        eManager.SetComponentData(e, new RenderData { bufferID = i });
         eManager.SetComponentData(e, anim);
         eManager.SetComponentData(e, col);
+        eManager.SetComponentData(e, new BufferHook { bufferID = i, bufferEnityID = 0 });
         eManager.SetSharedComponentData(e, material);
       }
       DynamicBufferManager.manager = eManager;

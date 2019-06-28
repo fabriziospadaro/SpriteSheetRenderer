@@ -6,34 +6,33 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
-public class SpriteSheetUvSystem : ComponentSystem {
-  EntityQuery indexQuery;
-  private readonly ComponentType cmpTypeB = ComponentType.ReadOnly<SpriteIndex>();
+public class SpriteSheetUvJobSystem : JobComponentSystem {
   //todo menage multiple materials
-  protected override void OnCreate() {
-    indexQuery = GetEntityQuery(cmpTypeB);
-  }
   //todo menage destruction of buffers
   [BurstCompile]
-  struct UpdateJob : IJob {
+  struct UpdateJob : IJobForEach<SpriteIndex, BufferHook> {
     [NativeDisableParallelForRestriction]
     public DynamicBuffer<SpriteIndexBuffer> indexBuffer;
-    [DeallocateOnJobCompletion]
     [ReadOnly]
-    public NativeArray<SpriteIndex> data;
-    public void Execute() {
-      for(int i = 0; i < data.Length; i++)
-        indexBuffer[data[i].bufferID] = data[i].Value;
+    public int bufferEnityID;
+    public void Execute([ReadOnly, ChangedFilter] ref SpriteIndex data, [ReadOnly, ChangedFilter] ref BufferHook hook) {
+      if(bufferEnityID == hook.bufferEnityID)
+        indexBuffer[hook.bufferID] = data.Value;
     }
   }
 
-  protected override void OnUpdate() {
-    indexQuery.SetFilterChanged(cmpTypeB);
-    NativeArray<SpriteIndex> data = indexQuery.ToComponentDataArray<SpriteIndex>(Allocator.TempJob);
-    var job = new UpdateJob() {
-      indexBuffer = DynamicBufferManager.GetIndexBuffer(),
-      data = data
-    };
-    job.Schedule().Complete();
+  protected override JobHandle OnUpdate(JobHandle inputDeps) {
+    var buffers = DynamicBufferManager.GetIndexBuffer();
+    NativeArray<JobHandle> jobs = new NativeArray<JobHandle>(buffers.Length, Allocator.TempJob);
+    for(int i = 0; i < buffers.Length; i++) {
+      inputDeps = new UpdateJob() {
+        indexBuffer = buffers[i],
+        bufferEnityID = i
+      }.Schedule(this, inputDeps);
+      jobs[i] = inputDeps;
+    }
+    JobHandle.CompleteAll(jobs);
+    jobs.Dispose();
+    return inputDeps;
   }
 }

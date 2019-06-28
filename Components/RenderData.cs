@@ -4,5 +4,4 @@ using UnityEngine;
 
 public struct RenderData : IComponentData {
   public float4 matrix;
-  public int bufferID;
 }

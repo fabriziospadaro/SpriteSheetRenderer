@@ -6,34 +6,33 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
-public class MatrixBufferSystem : ComponentSystem {
-  EntityQuery matrixQuery;
-  private readonly ComponentType cmpTypeB = ComponentType.ReadOnly<RenderData>();
+public class MatrixBufferSystem : JobComponentSystem {
   //todo menage multiple materials
-  protected override void OnCreate() {
-    matrixQuery = GetEntityQuery(cmpTypeB);
-  }
   //todo menage destruction of buffers
   [BurstCompile]
-  struct UpdateJob : IJob {
+  struct UpdateJob : IJobForEach<RenderData, BufferHook> {
     [NativeDisableParallelForRestriction]
-    public DynamicBuffer<MatrixBuffer> matrixBuffer;
-    [DeallocateOnJobCompletion]
+    public DynamicBuffer<MatrixBuffer> indexBuffer;
     [ReadOnly]
-    public NativeArray<RenderData> data;
-    public void Execute() {
-      for(int i = 0; i < data.Length; i++)
-        matrixBuffer[data[i].bufferID] = data[i].matrix;
+    public int bufferEnityID;
+    public void Execute([ReadOnly, ChangedFilter] ref RenderData data, [ReadOnly, ChangedFilter] ref BufferHook hook) {
+      if(bufferEnityID == hook.bufferEnityID)
+        indexBuffer[hook.bufferID] = data.matrix;
     }
   }
 
-  protected override void OnUpdate() {
-    matrixQuery.SetFilterChanged(cmpTypeB);
-    NativeArray<RenderData> data = matrixQuery.ToComponentDataArray<RenderData>(Allocator.TempJob);
-    var job = new UpdateJob() {
-      matrixBuffer = DynamicBufferManager.GetMatrixBuffer(),
-      data = data
-    };
-    job.Schedule().Complete();
+  protected override JobHandle OnUpdate(JobHandle inputDeps) {
+    var buffers = DynamicBufferManager.GetMatrixBuffer();
+    NativeArray<JobHandle> jobs = new NativeArray<JobHandle>(buffers.Length, Allocator.TempJob);
+    for(int i = 0; i < buffers.Length; i++) {
+      inputDeps = new UpdateJob() {
+        indexBuffer = buffers[i],
+        bufferEnityID = i
+      }.Schedule(this, inputDeps);
+      jobs[i] = inputDeps;
+    }
+    JobHandle.CompleteAll(jobs);
+    jobs.Dispose();
+    return inputDeps;
   }
 }

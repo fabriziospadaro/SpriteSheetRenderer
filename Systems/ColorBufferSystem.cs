@@ -6,34 +6,33 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
-public class ColorBufferSystem : ComponentSystem {
-  EntityQuery colorQuery;
-  private readonly ComponentType cmpTypeA = ComponentType.ReadOnly<SpriteSheetColor>();
+public class ColorBufferSystem : JobComponentSystem {
   //todo menage multiple materials
-  protected override void OnCreate() {
-    colorQuery = GetEntityQuery(cmpTypeA);
-  }
   //todo menage destruction of buffers
   [BurstCompile]
-  struct UpdateJob : IJob {
+  struct UpdateJob : IJobForEach<SpriteSheetColor, BufferHook> {
     [NativeDisableParallelForRestriction]
-    public DynamicBuffer<SpriteColorBuffer> colorBuffer;
-    [DeallocateOnJobCompletion]
+    public DynamicBuffer<SpriteColorBuffer> indexBuffer;
     [ReadOnly]
-    public NativeArray<SpriteSheetColor> colors;
-    public void Execute() {
-      for(int i = 0; i < colors.Length; i++)
-        colorBuffer[colors[i].bufferID] = colors[i].color;
+    public int bufferEnityID;
+    public void Execute([ReadOnly, ChangedFilter] ref SpriteSheetColor data, [ReadOnly, ChangedFilter] ref BufferHook hook) {
+      if(bufferEnityID == hook.bufferEnityID)
+        indexBuffer[hook.bufferID] = data.color;
     }
   }
 
-  protected override void OnUpdate() {
-    colorQuery.SetFilterChanged(cmpTypeA);
-    NativeArray<SpriteSheetColor> colors = colorQuery.ToComponentDataArray<SpriteSheetColor>(Allocator.TempJob);
-    var job = new UpdateJob() {
-      colors = colors,
-      colorBuffer = DynamicBufferManager.GetColorBuffer(),
-    };
-    job.Schedule().Complete();
+  protected override JobHandle OnUpdate(JobHandle inputDeps) {
+    var buffers = DynamicBufferManager.GetColorBuffer();
+    NativeArray<JobHandle> jobs = new NativeArray<JobHandle>(buffers.Length, Allocator.TempJob);
+    for(int i = 0; i < buffers.Length; i++) {
+      inputDeps = new UpdateJob() {
+        indexBuffer = buffers[i],
+        bufferEnityID = i
+      }.Schedule(this, inputDeps);
+      jobs[i] = inputDeps;
+    }
+    JobHandle.CompleteAll(jobs);
+    jobs.Dispose();
+    return inputDeps;
   }
 }
