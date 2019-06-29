@@ -49,6 +49,9 @@ namespace ECSSpriteSheetAnimation.Examples {
       Random rand = new Random((uint)UnityEngine.Random.Range(0, int.MaxValue));
       Rect area = GetSpawnArea();
       SpriteSheetMaterial material = new SpriteSheetMaterial { material = atlasData.Key };
+      DynamicBufferManager.manager = eManager;
+      DynamicBufferManager.GenerateBuffers(material, entities.Length);
+      DynamicBufferManager.BakeUvBuffer(material, atlasData);
       for(int i = 0; i < entities.Length; i++) {
         Entity e = entities[i];
         SpriteIndex sheet = new SpriteIndex { Value = rand.NextInt(0, cellCount) };
@@ -62,12 +65,9 @@ namespace ECSSpriteSheetAnimation.Examples {
         eManager.SetComponentData(e, pos);
         eManager.SetComponentData(e, anim);
         eManager.SetComponentData(e, col);
-        eManager.SetComponentData(e, new BufferHook { bufferID = i, bufferEnityID = 0 });
+        eManager.SetComponentData(e, new BufferHook { bufferID = i, bufferEnityID = DynamicBufferManager.GetEntityBufferID(material) });
         eManager.SetSharedComponentData(e, material);
       }
-      DynamicBufferManager.manager = eManager;
-      DynamicBufferManager.BakeUvBuffer(material, atlasData);
-      DynamicBufferManager.GenerateBuffers(material, entities.Length);
     }
 
     private void OnDrawGizmosSelected() {
