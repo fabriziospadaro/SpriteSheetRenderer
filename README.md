@@ -39,7 +39,8 @@ DynamicBufferManager.BakeUvBuffer(material, atlasData);
 
 * 4- Fill the values of each entity:
 
-```sh for(int i = 0; i < entities.Length; i++) {
+```sh 
+for(int i = 0; i < entities.Length; i++) {
   Entity e = entities[i];
   eManager.SetComponentData(e, new SpriteIndex { Value = 0});
   eManager.SetComponentData(e, new Scale { Value = 10 });
@@ -49,5 +50,21 @@ DynamicBufferManager.BakeUvBuffer(material, atlasData);
   eManager.SetComponentData(e, col);
   eManager.SetComponentData(e, new BufferHook { bufferID = i, bufferEnityID = DynamicBufferManager.GetEntityBufferID(material) });
   eManager.SetSharedComponentData(e, material);
+}
+```
+ 
+ * BONUS: Dynamically create sprites
+ ```sh
+public static Entity SpawnEntity(EntityCommandBuffer eManager, string materialName) {
+  var e = eManager.CreateEntity(archetype);
+  Material material = SpriteSheetCache.materialNameMaterial[materialName];
+
+  int bufferID = DynamicBufferManager.AddDynamicBuffers(DynamicBufferManager.GetEntityBuffer(material), material);
+  Entity uvBuffer = DynamicBufferManager.GetEntityBuffer(material);
+  int maxSprites = DynamicBufferManager.manager.GetBuffer<UvBuffer>(uvBuffer).Length;
+
+  eManager.SetComponent(e, new BufferHook { bufferID = bufferID, bufferEnityID = DynamicBufferManager.GetEntityBufferID(spriteSheetMaterial) });
+  eManager.SetSharedComponent(e, spriteSheetMaterial);
+  return e;
 }
 ```
