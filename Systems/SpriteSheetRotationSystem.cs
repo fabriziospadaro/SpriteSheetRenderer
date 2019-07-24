@@ -5,8 +5,8 @@ using Unity.Collections;
 
 public class SpriteSheetRotationSystem : JobComponentSystem {
   [BurstCompile]
-  struct SpriteSheetRotationJob : IJobForEach<Rotation2D, RenderData> {
-    public void Execute([ReadOnly] ref Rotation2D rotation, ref RenderData renderData) {
+  struct SpriteSheetRotationJob : IJobForEach<Rotation2D, SpriteMatrix> {
+    public void Execute([ReadOnly] ref Rotation2D rotation, ref SpriteMatrix renderData) {
       renderData.matrix.z = rotation.angle;
     }
   }

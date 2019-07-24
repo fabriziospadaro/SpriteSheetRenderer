@@ -8,12 +8,12 @@ using UnityEngine;
 
 public class MatrixBufferSystem : JobComponentSystem {
   [BurstCompile]
-  struct UpdateJob : IJobForEach<RenderData, BufferHook> {
+  struct UpdateJob : IJobForEach<SpriteMatrix, BufferHook> {
     [NativeDisableParallelForRestriction]
     public DynamicBuffer<MatrixBuffer> indexBuffer;
     [ReadOnly]
     public int bufferEnityID;
-    public void Execute([ReadOnly, ChangedFilter] ref RenderData data, [ReadOnly] ref BufferHook hook) {
+    public void Execute([ReadOnly, ChangedFilter] ref SpriteMatrix data, [ReadOnly] ref BufferHook hook) {
       if(bufferEnityID == hook.bufferEnityID)
         indexBuffer[hook.bufferID] = data.matrix;
     }

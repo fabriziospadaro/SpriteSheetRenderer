@@ -21,7 +21,7 @@ public class SpriteSheetRenderer : ComponentSystem {
   bool initialize = false;
   protected override void OnCreate() {
     shaderPropertyId = Shader.PropertyToID("_MainText_UV");
-    processable = GetEntityQuery(ComponentType.ReadOnly<RenderData>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
+    processable = GetEntityQuery(ComponentType.ReadOnly<SpriteMatrix>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
     uvBufferQuery = GetEntityQuery(ComponentType.ReadOnly<UvBuffer>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
     colorBufferQuery = GetEntityQuery(ComponentType.ReadOnly<SpriteColorBuffer>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
     matrixBufferQuery = GetEntityQuery(ComponentType.ReadOnly<MatrixBuffer>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
