@@ -6,21 +6,21 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
-public class SpriteSheetUvJobSystem : JobComponentSystem {
+public class MatrixBufferSystem : JobComponentSystem {
   [BurstCompile]
-  struct UpdateJob : IJobForEach<SpriteIndex, BufferHook> {
+  struct UpdateJob : IJobForEach<SpriteMatrix, BufferHook> {
     [NativeDisableParallelForRestriction]
-    public DynamicBuffer<SpriteIndexBuffer> indexBuffer;
+    public DynamicBuffer<MatrixBuffer> indexBuffer;
     [ReadOnly]
     public int bufferEnityID;
-    public void Execute([ReadOnly, ChangedFilter] ref SpriteIndex data, [ReadOnly] ref BufferHook hook) {
+    public void Execute([ReadOnly, ChangedFilter] ref SpriteMatrix data, [ReadOnly] ref BufferHook hook) {
       if(bufferEnityID == hook.bufferEnityID)
-        indexBuffer[hook.bufferID] = data.Value;
+        indexBuffer[hook.bufferID] = data.matrix;
     }
   }
 
   protected override JobHandle OnUpdate(JobHandle inputDeps) {
-    var buffers = DynamicBufferManager.GetIndexBuffers();
+    var buffers = DynamicBufferManager.GetMatrixBuffers();
     NativeArray<JobHandle> jobs = new NativeArray<JobHandle>(buffers.Length, Allocator.TempJob);
     for(int i = 0; i < buffers.Length; i++) {
       inputDeps = new UpdateJob() {

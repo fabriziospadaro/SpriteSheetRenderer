@@ -6,9 +6,9 @@ using Unity.Transforms;
 
 public class SpriteSheetScaleSystem : JobComponentSystem {
   [BurstCompile]
-  struct SpriteSheetScaleJob : IJobForEach<Scale, RenderData> {
-    public void Execute([ReadOnly][ChangedFilter] ref Scale scale, ref RenderData renderData) {
-      renderData.matrix.c0.w = scale.Value;
+  struct SpriteSheetScaleJob : IJobForEach<Scale, SpriteMatrix> {
+    public void Execute([ReadOnly][ChangedFilter] ref Scale scale, ref SpriteMatrix renderData) {
+      renderData.matrix.w = scale.Value;
     }
   }
 

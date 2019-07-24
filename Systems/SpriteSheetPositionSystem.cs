@@ -6,10 +6,10 @@ using Unity.Collections;
 
 public class SpriteSheetPositionSystem : JobComponentSystem {
   [BurstCompile]
-  struct SpriteSheetPositionJob : IJobForEach<Position2D, RenderData> {
-    public void Execute([ReadOnly][ChangedFilter]ref Position2D translation, ref RenderData renderData) {
-      renderData.matrix.c0.x = translation.Value.x;
-      renderData.matrix.c0.y = translation.Value.y;
+  struct SpriteSheetPositionJob : IJobForEach<Position2D, SpriteMatrix> {
+    public void Execute([ReadOnly][ChangedFilter]ref Position2D translation, ref SpriteMatrix renderData) {
+      renderData.matrix.x = translation.Value.x;
+      renderData.matrix.y = translation.Value.y;
     }
   }
 

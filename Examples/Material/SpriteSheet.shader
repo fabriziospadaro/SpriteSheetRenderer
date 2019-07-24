@@ -26,7 +26,9 @@
 
             sampler2D _MainTex;
 
-            StructuredBuffer<float4x2> matrixBuffer;
+            StructuredBuffer<float4> matrixBuffer;
+            StructuredBuffer<int> indexBuffer;
+            StructuredBuffer<float4> uvBuffer;
 			StructuredBuffer<float4> colorsBuffer;
 
             struct v2f{
@@ -52,8 +54,8 @@
                 //transform.xy = posizion x and y
                 //transform.z = rotation angle
                 //transform.w = scale
-                float4 transform = float4(matrixBuffer[instanceID][0].x,matrixBuffer[instanceID][1].x,matrixBuffer[instanceID][2].x,matrixBuffer[instanceID][3].x);
-                float4 uv = float4(matrixBuffer[instanceID][0].y,matrixBuffer[instanceID][1].y,matrixBuffer[instanceID][2].y,matrixBuffer[instanceID][3].y);
+                float4 transform = matrixBuffer[instanceID];
+                float4 uv = uvBuffer[indexBuffer[instanceID]];
                 //rotate the vertex
                 v.vertex = mul(v.vertex-float4(0.5,0.5,0,0),rotationZMatrix(transform.z));
                 //scale it

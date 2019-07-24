@@ -12,12 +12,20 @@ public class SpriteSheetRenderer : ComponentSystem {
 
   RenderInformation[] renderInfos;
   EntityQuery processable;
+  EntityQuery uvBufferQuery;
+  EntityQuery indexBufferQuery;
+  EntityQuery colorBufferQuery;
+  EntityQuery matrixBufferQuery;
+
   int shaderPropertyId;
   bool initialize = false;
-
   protected override void OnCreate() {
     shaderPropertyId = Shader.PropertyToID("_MainText_UV");
-    processable = GetEntityQuery(ComponentType.ReadOnly<RenderData>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
+    processable = GetEntityQuery(ComponentType.ReadOnly<SpriteMatrix>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
+    uvBufferQuery = GetEntityQuery(ComponentType.ReadOnly<UvBuffer>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
+    colorBufferQuery = GetEntityQuery(ComponentType.ReadOnly<SpriteColorBuffer>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
+    matrixBufferQuery = GetEntityQuery(ComponentType.ReadOnly<MatrixBuffer>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
+    indexBufferQuery = GetEntityQuery(ComponentType.ReadOnly<SpriteIndexBuffer>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
   }
 
   protected override void OnDestroy() {
@@ -51,52 +59,51 @@ public class SpriteSheetRenderer : ComponentSystem {
       renderInfos[bufferID].matrixBuffer.Release();
     if(renderInfos[bufferID].colorsBuffer != null)
       renderInfos[bufferID].colorsBuffer.Release();
+    if(renderInfos[bufferID].uvBuffer != null)
+      renderInfos[bufferID].uvBuffer.Release();
+    if(renderInfos[bufferID].indexBuffer != null)
+      renderInfos[bufferID].indexBuffer.Release();
   }
 
   int UpdateBuffers(int renderIndex) {
     ClearDataBuffers(renderIndex);
-    processable.SetFilter(new SpriteSheetMaterial { material = renderInfos[renderIndex].material });
-    NativeArray<RenderData> renderData = processable.ToComponentDataArray<RenderData>(Allocator.TempJob);
-    int instanceCount = renderData.Length;
-    if(instanceCount > 0) {
-      NativeArray<float4x2> matrices = new NativeArray<float4x2>(instanceCount, Allocator.TempJob);
-      NativeArray<float4> colors = new NativeArray<float4>(instanceCount, Allocator.TempJob);
-      var job = new ProcessRenderDataJob() {
-        renderData = renderData,
-        matrices = matrices,
-        colors = colors,
-      };
-      JobHandle jobHandle = job.Schedule();
-      jobHandle.Complete();
+    SpriteSheetMaterial material = new SpriteSheetMaterial {
+      material = renderInfos[renderIndex].material
+    };
 
-      renderInfos[renderIndex].matrixBuffer = new ComputeBuffer(instanceCount, 32);
-      renderInfos[renderIndex].matrixBuffer.SetData(job.matrices);
+    uvBufferQuery.SetFilter(material);
+    matrixBufferQuery.SetFilter(material);
+    indexBufferQuery.SetFilter(material);
+    colorBufferQuery.SetFilter(material);
+
+    var entities = matrixBufferQuery.ToEntityArray(Allocator.TempJob);
+    var bufferEntity = entities[0];
+    entities.Dispose();
+
+    int instanceCount = EntityManager.GetBuffer<SpriteIndexBuffer>(bufferEntity).Length;
+    if(instanceCount > 0) {
+
+      renderInfos[renderIndex].uvBuffer = new ComputeBuffer(instanceCount, 16);
+      renderInfos[renderIndex].uvBuffer.SetData(EntityManager.GetBuffer<UvBuffer>(bufferEntity).Reinterpret<float4>().AsNativeArray());
+      renderInfos[renderIndex].material.SetBuffer("uvBuffer", renderInfos[renderIndex].uvBuffer);
+
+
+      renderInfos[renderIndex].indexBuffer = new ComputeBuffer(instanceCount, sizeof(int));
+      renderInfos[renderIndex].indexBuffer.SetData(EntityManager.GetBuffer<SpriteIndexBuffer>(bufferEntity).Reinterpret<int>().AsNativeArray());
+      renderInfos[renderIndex].material.SetBuffer("indexBuffer", renderInfos[renderIndex].indexBuffer);
+
+      renderInfos[renderIndex].matrixBuffer = new ComputeBuffer(instanceCount, 16);
+      renderInfos[renderIndex].matrixBuffer.SetData(EntityManager.GetBuffer<MatrixBuffer>(bufferEntity).Reinterpret<float4>().AsNativeArray());
       renderInfos[renderIndex].material.SetBuffer("matrixBuffer", renderInfos[renderIndex].matrixBuffer);
-      matrices.Dispose();
 
       renderInfos[renderIndex].args[1] = (uint)instanceCount;
       renderInfos[renderIndex].argsBuffer.SetData(renderInfos[renderIndex].args);
 
-      renderInfos[renderIndex].colorsBuffer = new ComputeBuffer(instanceCount, sizeof(float) * 4);
-      renderInfos[renderIndex].colorsBuffer.SetData(job.colors);
+      renderInfos[renderIndex].colorsBuffer = new ComputeBuffer(instanceCount, 16);
+      renderInfos[renderIndex].colorsBuffer.SetData(EntityManager.GetBuffer<SpriteColorBuffer>(bufferEntity).Reinterpret<float4>().AsNativeArray());
       renderInfos[renderIndex].material.SetBuffer("colorsBuffer", renderInfos[renderIndex].colorsBuffer);
-      colors.Dispose();
     }
-
-    renderData.Dispose();
     return instanceCount;
   }
-}
 
-[BurstCompile]
-struct ProcessRenderDataJob : IJob {
-  public NativeArray<float4x2> matrices;
-  public NativeArray<float4> colors;
-  [ReadOnly] public NativeArray<RenderData> renderData;
-  public void Execute() {
-    for(int i = 0; i < renderData.Length; i++) {
-      matrices[i] = renderData[i].matrix;
-      colors[i] = renderData[i].color;
-    }
-  }
 }
