@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 public static class SpriteSheetCache {
-  public static Dictionary<string, Material> materialNameMaterial = new Dictionary<string, Material>();
+  private static Dictionary<string, KeyValuePair<Material, int>> materialNameMaterial = new Dictionary<string, KeyValuePair<Material, int>>();
+  private static Dictionary<Material, string> materialToName = new Dictionary<Material, string>();
   public static KeyValuePair<Material, float4[]> BakeSprites(Sprite[] sprites, string materialName) {
     Material material = new Material(Shader.Find("Instanced/SpriteSheet"));
     Texture texture = sprites[0].texture;
@@ -27,8 +28,14 @@ public static class SpriteSheetCache {
         uvs[i].w = OffsetY;
         i++;
       }
-      materialNameMaterial.Add(materialName, material);
+      materialNameMaterial.Add(materialName, new KeyValuePair<Material, int>(material, sprites.Length));
+      materialToName.Add(material, materialName);
       return new KeyValuePair<Material, float4[]>(material, uvs);
     }
   }
+  public static int GetLenght(string spriteSheetName) => materialNameMaterial[spriteSheetName].Value;
+  public static Material GetMaterial(string spriteSheetName) => materialNameMaterial[spriteSheetName].Key;
+  public static string GetMaterialName(Material material) => materialToName[material];
+  public static int GetLenght(Material material) => GetLenght(GetMaterialName(material));
+
 }

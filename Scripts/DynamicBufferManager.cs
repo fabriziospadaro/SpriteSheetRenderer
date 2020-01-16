@@ -9,24 +9,32 @@ using System.Linq;
 //todo entity is a dictionary with spritesheetmaterial and is used to separate buffers from different material
 
 public static class DynamicBufferManager {
-  public static EntityManager manager;
+  private static EntityManager entityManager;
+
+  public static EntityManager EntityManager {
+    get {
+      if(entityManager == null)
+        entityManager = World.Active.EntityManager;
+      return entityManager;
+    }
+  }
   //list of all the "Enities with all the buffers"
   //Each different material have a different Enity
-  public static List<Entity> bufferEntities = new List<Entity>();
+  private static List<Entity> bufferEntities = new List<Entity>();
   //contains the index of a bufferEntity inside the bufferEntities from a material
-  public static Dictionary<Material, int> materialEntityBufferID = new Dictionary<Material, int>();
+  private static Dictionary<Material, int> materialEntityBufferID = new Dictionary<Material, int>();
 
-  public static Dictionary<Material, List<int>> availableEntityID = new Dictionary<Material, List<int>>();
+  private static Dictionary<Material, List<int>> availableEntityID = new Dictionary<Material, List<int>>();
 
   //only use this when you didn't bake the uv yet
   public static void BakeUvBuffer(SpriteSheetMaterial spriteSheetMaterial, KeyValuePair<Material, float4[]> atlasData) {
     Entity entity = GetEntityBuffer(spriteSheetMaterial.material);
-    var buffer = manager.GetBuffer<UvBuffer>(entity);
+    var buffer = EntityManager.GetBuffer<UvBuffer>(entity);
     for(int j = 0; j < atlasData.Value.Length; j++)
       buffer.Add(atlasData.Value[j]);
   }
 
-  public static void GenerateBuffers(SpriteSheetMaterial material, int entityCount) {
+  public static void GenerateBuffers(SpriteSheetMaterial material, int entityCount = 0) {
     if(!materialEntityBufferID.ContainsKey(material.material)) {
       CreateBuffersContainer(material);
       availableEntityID.Add(material.material, new List<int>());
@@ -39,25 +47,25 @@ public static class DynamicBufferManager {
   //use this when it's the first time you are using that material
   //use this just to generate the buffers container
   public static void CreateBuffersContainer(SpriteSheetMaterial material) {
-    var archetype = manager.CreateArchetype(
+    var archetype = EntityManager.CreateArchetype(
       typeof(SpriteIndexBuffer),
       typeof(MatrixBuffer),
       typeof(SpriteColorBuffer),
       typeof(SpriteSheetMaterial),
       typeof(UvBuffer)
     );
-    Entity e = manager.CreateEntity(archetype);
+    Entity e = EntityManager.CreateEntity(archetype);
     bufferEntities.Add(e);
-    manager.SetSharedComponentData(e, material);
+    EntityManager.SetSharedComponentData(e, material);
     materialEntityBufferID.Add(material.material, materialEntityBufferID.Count);
   }
 
   //when u create a new entity you need a new buffer for him
   //use this to add new dynamicbuffer
   public static void MassAddBuffers(Entity bufferEntity, int entityCount) {
-    var indexBuffer = manager.GetBuffer<SpriteIndexBuffer>(bufferEntity);
-    var colorBuffer = manager.GetBuffer<SpriteColorBuffer>(bufferEntity);
-    var matrixBuffer = manager.GetBuffer<MatrixBuffer>(bufferEntity);
+    var indexBuffer = EntityManager.GetBuffer<SpriteIndexBuffer>(bufferEntity);
+    var colorBuffer = EntityManager.GetBuffer<SpriteColorBuffer>(bufferEntity);
+    var matrixBuffer = EntityManager.GetBuffer<MatrixBuffer>(bufferEntity);
     for(int i = 0; i < entityCount; i++) {
       indexBuffer.Add(new SpriteIndexBuffer());
       matrixBuffer.Add(new MatrixBuffer());
@@ -67,9 +75,9 @@ public static class DynamicBufferManager {
 
   public static int AddDynamicBuffers(Entity bufferEntity, Material material) {
     int bufferId = NextIDForEntity(material);
-    var indexBuffer = manager.GetBuffer<SpriteIndexBuffer>(bufferEntity);
-    var colorBuffer = manager.GetBuffer<SpriteColorBuffer>(bufferEntity);
-    var matrixBuffer = manager.GetBuffer<MatrixBuffer>(bufferEntity);
+    var indexBuffer = EntityManager.GetBuffer<SpriteIndexBuffer>(bufferEntity);
+    var colorBuffer = EntityManager.GetBuffer<SpriteColorBuffer>(bufferEntity);
+    var matrixBuffer = EntityManager.GetBuffer<MatrixBuffer>(bufferEntity);
     if(indexBuffer.Length <= bufferId) {
       indexBuffer.Add(new SpriteIndexBuffer());
       colorBuffer.Add(new SpriteColorBuffer());
@@ -107,25 +115,25 @@ public static class DynamicBufferManager {
   public static DynamicBuffer<SpriteIndexBuffer>[] GetIndexBuffers() {
     DynamicBuffer<SpriteIndexBuffer>[] buffers = new DynamicBuffer<SpriteIndexBuffer>[bufferEntities.Count];
     for(int i = 0; i < buffers.Length; i++)
-      buffers[i] = manager.GetBuffer<SpriteIndexBuffer>(bufferEntities[i]);
+      buffers[i] = EntityManager.GetBuffer<SpriteIndexBuffer>(bufferEntities[i]);
     return buffers;
   }
   public static DynamicBuffer<MatrixBuffer>[] GetMatrixBuffers() {
     DynamicBuffer<MatrixBuffer>[] buffers = new DynamicBuffer<MatrixBuffer>[bufferEntities.Count];
     for(int i = 0; i < buffers.Length; i++)
-      buffers[i] = manager.GetBuffer<MatrixBuffer>(bufferEntities[i]);
+      buffers[i] = EntityManager.GetBuffer<MatrixBuffer>(bufferEntities[i]);
     return buffers;
   }
   public static DynamicBuffer<SpriteColorBuffer>[] GetColorBuffers() {
     DynamicBuffer<SpriteColorBuffer>[] buffers = new DynamicBuffer<SpriteColorBuffer>[bufferEntities.Count];
     for(int i = 0; i < buffers.Length; i++)
-      buffers[i] = manager.GetBuffer<SpriteColorBuffer>(bufferEntities[i]);
+      buffers[i] = EntityManager.GetBuffer<SpriteColorBuffer>(bufferEntities[i]);
     return buffers;
   }
   public static DynamicBuffer<UvBuffer>[] GetUvBuffers() {
     DynamicBuffer<UvBuffer>[] buffers = new DynamicBuffer<UvBuffer>[bufferEntities.Count];
     for(int i = 0; i < buffers.Length; i++)
-      buffers[i] = manager.GetBuffer<UvBuffer>(bufferEntities[i]);
+      buffers[i] = EntityManager.GetBuffer<UvBuffer>(bufferEntities[i]);
     return buffers;
   }
 

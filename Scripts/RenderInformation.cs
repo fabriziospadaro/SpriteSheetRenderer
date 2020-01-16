@@ -6,11 +6,13 @@ class RenderInformation {
   public ComputeBuffer colorsBuffer;
   public ComputeBuffer uvBuffer;
   public ComputeBuffer indexBuffer;
+  public int spriteCount;
   public Material material;
   public uint[] args;
 
   public RenderInformation(Material material) {
     this.material = material;
+    spriteCount = SpriteSheetCache.GetLenght(material);
     args = new uint[5] { 0, 0, 0, 0, 0 };
     argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
     //thoose args are always the same since we always use the same mesh
