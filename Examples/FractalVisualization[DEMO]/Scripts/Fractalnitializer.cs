@@ -3,7 +3,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
-public class QuadTreeWorldInitializer : MonoBehaviour, IConvertGameObjectToEntity {
+public class Fractalnitializer : MonoBehaviour, IConvertGameObjectToEntity {
   public Sprite[] sprites;
   public static EntityArchetype archetype;
   public static QuadTree qt;

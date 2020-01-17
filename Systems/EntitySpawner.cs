@@ -7,7 +7,7 @@ public class EntitySpawner : MonoBehaviour {
   QuadTree qt = null;
   private Text spriteCount;
   private void Start() {
-    qt = QuadTreeWorldInitializer.qt;
+    qt = Fractalnitializer.qt;
     spriteCount = GameObject.Find("EntityCount").GetComponent<Text>();
   }
 

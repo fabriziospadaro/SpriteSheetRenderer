@@ -246,7 +246,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c87523ccd27b5014a8ecc87d4d3692a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spriteCount: 800000
+  spriteCount: 1000000
   sprites:
   - {fileID: -654221344278647648, guid: a1ffe2230b9de4eb98a84c30452fa8d5, type: 3}
   - {fileID: 6191509826233423226, guid: a1ffe2230b9de4eb98a84c30452fa8d5, type: 3}
