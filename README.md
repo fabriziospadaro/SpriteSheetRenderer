@@ -1,45 +1,95 @@
 # SpriteSheetRenderer
 A powerful Unity ECS system to render massive numbers of animated sprites using DynamicBuffers and ComputeBuffer:
-##### 800k sprites were rendered at 75fps on a Mid-2015 MacBook Pro.
-![N|Solid](https://forum.unity.com/proxy.php?image=https%3A%2F%2Fimgur.com%2F9hKKxst.png&hash=0be52246a477619ac78271704a0597f6)
-### How to use:
+##### 1 million animated sprites were rendered at 60fps on a Mid-2015 MacBook Pro.
+![N|Solid](https://forum.unity.com/proxy.php?image=https%3A%2F%2Fi.imgur.com%2FzRSWhy0.png&hash=754bc4b4187e2d72ce0eb2c578b996dc)
+### How to use (SINGLE INSTANTIATE):
 * 1- Create the Archetype:
 
 ```sh
-EntityManager archetype = eManager.CreateArchetype(
-  typeof(Position2D),
-  typeof(Rotation2D),
-  typeof(Scale),
-  typeof(SpriteIndex),
-  typeof(SpriteSheetAnimation),
-  typeof(SpriteSheetMaterial),
-  typeof(SpriteSheetColor),
-  typeof(SpriteMatrix),
-  typeof(BufferHook)
+EntityArchetype archetype = eManager.CreateArchetype(
+    typeof(Position2D),
+    typeof(Rotation2D),
+    typeof(Scale),
+    //required params
+    typeof(SpriteIndex),
+    typeof(SpriteSheetAnimation),
+    typeof(SpriteSheetMaterial),
+    typeof(SpriteSheetColor),
+    typeof(SpriteMatrix),
+    typeof(BufferHook)
 );
 ```
 
-* 2- Spawn a HUUUUGE number of entities:
+* 2- Record and bake this spritesheet(only once)
 
 ```sh
-NativeArray<Entity> entities = new NativeArray<Entity>(800000, Allocator.Temp);
-entityManager.CreateEntity(archetype, entities);
+SpriteSheetManager.RecordSpriteSheet(sprites, "emoji");
 ```
-* 3- Bake and create dynamic buffers
+* 3- Populate components
 
 ```sh
-//only needed for first time material baking
-KeyValuePair<Material, float4[]> atlasData = SpriteSheetCache.BakeSprites(sprites, "emoji");
-SpriteSheetMaterial material = new SpriteSheetMaterial { material = atlasData.Key };
-
-DynamicBufferManager.manager = eManager;
-DynamicBufferManager.GenerateBuffers(material, entities.Length);
-DynamicBufferManager.BakeUvBuffer(material, atlasData);
+List<IComponentData> components = new List<IComponentData> {
+    new Position2D { Value = float2.zero },
+    new Scale { Value = 15 },
+    new SpriteIndex { Value = UnityEngine.Random.Range(0, maxSprites) },
+    new SpriteSheetAnimation { maxSprites = maxSprites, play = true, repetition = SpriteSheetAnimation.RepetitionType.Loop, samples = 10 },
+    new SpriteSheetColor { color = new float4(color.r, color.g, color.b, color.a) }
+};
 ```
 
-* 4- Fill the values of each entity:
+* 4- Instantiate the entity
 
 ```sh 
+Entity e = SpriteSheetManager.Instantiate(archetype, components, "emoji");
+```
+ 
+* Update the entity
+
+```sh 
+Entity e = SpriteSheetManager.UpdateEntity(e, new Position2D { Value = float2.zero});
+``` 
+
+* Destroy the entity
+
+```sh 
+Entity e = SpriteSheetManager.DestroyEntity(e, "emoji");
+``` 
+
+### How to use (BULK INSTANTIATE):
+
+* 1- Create the Archetype:
+
+```sh
+EntityArchetype archetype = eManager.CreateArchetype(
+    typeof(Position2D),
+    typeof(Rotation2D),
+    typeof(Scale),
+    //required params
+    typeof(SpriteIndex),
+    typeof(SpriteSheetAnimation),
+    typeof(SpriteSheetMaterial),
+    typeof(SpriteSheetColor),
+    typeof(SpriteMatrix),
+    typeof(BufferHook)
+);
+```
+
+* 2- Bulk instantiate entities
+
+```sh
+NativeArray<Entity> entities = new NativeArray<Entity>(spriteCount, Allocator.Temp);
+eManager.CreateEntity(archetype, entities);
+```
+
+* 2- Record and bake this spritesheet(only once)
+
+```sh
+SpriteSheetManager.RecordSpriteSheet(sprites, "emoji");
+```
+
+* 3- Populate components
+
+```sh
 for(int i = 0; i < entities.Length; i++) {
   Entity e = entities[i];
   eManager.SetComponentData(e, new SpriteIndex { Value = 0});
@@ -50,21 +100,5 @@ for(int i = 0; i < entities.Length; i++) {
   eManager.SetComponentData(e, col);
   eManager.SetComponentData(e, new BufferHook { bufferID = i, bufferEnityID = DynamicBufferManager.GetEntityBufferID(material) });
   eManager.SetSharedComponentData(e, material);
-}
-```
- 
- * BONUS: Dynamically create sprites
- ```sh
-public static Entity SpawnEntity(EntityCommandBuffer eManager, string materialName) {
-  var e = eManager.CreateEntity(archetype);
-  Material material = SpriteSheetCache.materialNameMaterial[materialName];
-
-  int bufferID = DynamicBufferManager.AddDynamicBuffers(DynamicBufferManager.GetEntityBuffer(material), material);
-  Entity uvBuffer = DynamicBufferManager.GetEntityBuffer(material);
-  int maxSprites = DynamicBufferManager.manager.GetBuffer<UvBuffer>(uvBuffer).Length;
-
-  eManager.SetComponent(e, new BufferHook { bufferID = bufferID, bufferEnityID = DynamicBufferManager.GetEntityBufferID(spriteSheetMaterial) });
-  eManager.SetSharedComponent(e, spriteSheetMaterial);
-  return e;
 }
 ```
