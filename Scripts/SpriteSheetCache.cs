@@ -33,9 +33,9 @@ public static class SpriteSheetCache {
       return new KeyValuePair<Material, float4[]>(material, uvs);
     }
   }
-  public static int GetLenght(string spriteSheetName) => materialNameMaterial[spriteSheetName].Value;
+  public static int GetLength(string spriteSheetName) => materialNameMaterial[spriteSheetName].Value;
   public static Material GetMaterial(string spriteSheetName) => materialNameMaterial[spriteSheetName].Key;
   public static string GetMaterialName(Material material) => materialToName[material];
-  public static int GetLenght(Material material) => GetLenght(GetMaterialName(material));
+  public static int GetLenght(Material material) => GetLength(GetMaterialName(material));
 
 }

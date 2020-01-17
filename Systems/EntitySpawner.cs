@@ -1,11 +1,14 @@
 ﻿using UnityEngine;
 using Unity.Mathematics;
+using UnityEngine.UI;
+using Unity.Entities;
+
 public class EntitySpawner : MonoBehaviour {
   QuadTree qt = null;
-
+  private Text spriteCount;
   private void Start() {
     qt = QuadTreeWorldInitializer.qt;
-
+    spriteCount = GameObject.Find("EntityCount").GetComponent<Text>();
   }
 
   public void Update() {
@@ -21,5 +24,9 @@ public class EntitySpawner : MonoBehaviour {
       screenPoint = Camera.main.ScreenToWorldPoint(screenPoint);
       qt.Insert(new float2(screenPoint.x, screenPoint.y));
     }
+    spriteCount.text = "Entity Count: " + (World.Active.EntityManager.Debug.EntityCount - 2).ToString();
+  }
+  public void Subdivide() {
+    qt.Insert(float2.zero, true);
   }
 }

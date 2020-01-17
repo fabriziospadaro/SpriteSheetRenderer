@@ -39,7 +39,7 @@ namespace ECSSpriteSheetAnimation.Examples {
 
       Rect area = GetSpawnArea();
       Random rand = new Random((uint)UnityEngine.Random.Range(0, int.MaxValue));
-      int cellCount = SpriteSheetCache.GetLenght("emoji");
+      int cellCount = SpriteSheetCache.GetLength("emoji");
       SpriteSheetMaterial material = new SpriteSheetMaterial { material = SpriteSheetCache.GetMaterial("emoji") };
 
       for(int i = 0; i < entities.Length; i++) {

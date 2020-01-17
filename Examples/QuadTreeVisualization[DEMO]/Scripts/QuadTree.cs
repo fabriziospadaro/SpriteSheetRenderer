@@ -10,7 +10,7 @@ public class QuadTree {
   bool splitted = false;
   public QuadTree(float3 bounds, Entity entity) {
     this.bounds = bounds;
-    int maxSprites = SpriteSheetCache.GetLenght("emoji");
+    int maxSprites = SpriteSheetCache.GetLength("emoji");
     if(entity == Entity.Null) {
       var color = UnityEngine.Random.ColorHSV(.35f, .85f);
       List<IComponentData> components = new List<IComponentData> {
@@ -53,15 +53,15 @@ public class QuadTree {
     tree[3] = new QuadTree(new float3(bounds.x + bounds.z / 4, bounds.y + bounds.z / 4, bounds.z / 2), entity);
   }
 
-  public void Insert(float2 pos) {
-    if(!splitted && Intersects(pos)) {
+  public void Insert(float2 pos, bool force = false) {
+    if(!splitted && (force || Intersects(pos))) {
       Subdivide();
     }
     else if(splitted) {
-      tree[0].Insert(pos);
-      tree[1].Insert(pos);
-      tree[2].Insert(pos);
-      tree[3].Insert(pos);
+      tree[0].Insert(pos, force);
+      tree[1].Insert(pos, force);
+      tree[2].Insert(pos, force);
+      tree[3].Insert(pos, force);
     }
   }
 
