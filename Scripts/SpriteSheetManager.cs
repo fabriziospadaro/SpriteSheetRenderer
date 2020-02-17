@@ -32,10 +32,10 @@ public abstract class SpriteSheetManager {
   }
 
   public static void DestroyEntity(Entity e, string materialName) {
-    EntityManager.DestroyEntity(e);
     Material material = SpriteSheetCache.GetMaterial(materialName);
     int bufferID = EntityManager.GetComponentData<BufferHook>(e).bufferID;
     DynamicBufferManager.RemoveBuffer(material, bufferID);
+    EntityManager.DestroyEntity(e);
   }
 
   public static void DestroyEntity(Entity e, Material material, int bufferID) {

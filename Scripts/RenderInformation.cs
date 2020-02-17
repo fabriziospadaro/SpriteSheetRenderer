@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Unity.Entities;
+using UnityEngine;
 
 class RenderInformation {
   public ComputeBuffer matrixBuffer;
@@ -6,13 +7,15 @@ class RenderInformation {
   public ComputeBuffer colorsBuffer;
   public ComputeBuffer uvBuffer;
   public ComputeBuffer indexBuffer;
+  public Entity bufferEntity;
   public int spriteCount;
   public Material material;
   public uint[] args;
 
-  public RenderInformation(Material material) {
+  public RenderInformation(Material material, Entity bufferEntity) {
     this.material = material;
     spriteCount = SpriteSheetCache.GetLenght(material);
+    this.bufferEntity = bufferEntity;
     args = new uint[5] { 0, 0, 0, 0, 0 };
     argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
     //thoose args are always the same since we always use the same mesh
