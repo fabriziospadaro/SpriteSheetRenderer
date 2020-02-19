@@ -1,7 +1,7 @@
 ﻿using Unity.Entities;
 using UnityEngine;
 
-class RenderInformation {
+public class RenderInformation {
   public ComputeBuffer matrixBuffer;
   public ComputeBuffer argsBuffer;
   public ComputeBuffer colorsBuffer;

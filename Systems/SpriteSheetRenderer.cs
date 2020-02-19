@@ -10,54 +10,24 @@ using System.Linq;
 public class SpriteSheetRenderer : ComponentSystem {
   private Mesh mesh;
 
-  RenderInformation[] renderInfos;
-  /*
-  EntityQuery uvBufferQuery;
-  EntityQuery indexBufferQuery;
-  EntityQuery colorBufferQuery;
-  EntityQuery matrixBufferQuery;
-  */
   int shaderPropertyId;
-  bool initialize = false;
   protected override void OnCreate() {
+    mesh = MeshExtension.Quad();
     shaderPropertyId = Shader.PropertyToID("_MainText_UV");
-    /*
-    uvBufferQuery = GetEntityQuery(ComponentType.ReadOnly<UvBuffer>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
-    colorBufferQuery = GetEntityQuery(ComponentType.ReadOnly<SpriteColorBuffer>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
-    matrixBufferQuery = GetEntityQuery(ComponentType.ReadOnly<MatrixBuffer>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
-    indexBufferQuery = GetEntityQuery(ComponentType.ReadOnly<SpriteIndexBuffer>(), ComponentType.ReadOnly<SpriteSheetMaterial>());
-    */
   }
 
   protected override void OnDestroy() {
-    for(int i = 0; i < renderInfos.Length; i++)
-      renderInfos[i].DestroyBuffers();
+    SpriteSheetManager.CleanBuffers();
   }
-
   protected override void OnUpdate() {
-    if(!initialize) {
-      List<SpriteSheetMaterial> materials = new List<SpriteSheetMaterial>();
-      EntityManager.GetAllUniqueSharedComponentData(materials);
-      for(int i = 0; i < materials.Count; i++)
-        if(!materials[i].material)
-          materials.Remove(materials[i]);
-
-      renderInfos = new RenderInformation[materials.Count];
-      for(int i = 0; i < renderInfos.Length; i++) {
-        renderInfos[i] = new RenderInformation(materials[i].material, DynamicBufferManager.GetEntityBuffer(materials[i].material));
-      }
-
-      mesh = MeshExtension.Quad();
-      initialize = true;
-    }
 
 
-    for(int i = 0; i < renderInfos.Length; i++) {
+    for(int i = 0; i < SpriteSheetManager.renderInformation.Count; i++) {
       if(UpdateBuffers(i) > 0)
-        Graphics.DrawMeshInstancedIndirect(mesh, 0, renderInfos[i].material, new Bounds(Vector2.zero, Vector3.one), renderInfos[i].argsBuffer);
+        Graphics.DrawMeshInstancedIndirect(mesh, 0, SpriteSheetManager.renderInformation[i].material, new Bounds(Vector2.zero, Vector3.one), SpriteSheetManager.renderInformation[i].argsBuffer);
 
       //this is just a wip to clean the old buffers
-      DynamicBuffer<SpriteIndexBuffer> indexBuffer = EntityManager.GetBuffer<SpriteIndexBuffer>(renderInfos[i].bufferEntity);
+      DynamicBuffer<SpriteIndexBuffer> indexBuffer = EntityManager.GetBuffer<SpriteIndexBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity);
       int size = indexBuffer.Length - 1;
       int toRemove = 0;
       for(int j = size; j >= 0; j--) {
@@ -69,58 +39,39 @@ public class SpriteSheetRenderer : ComponentSystem {
         }
       }
       if(toRemove > 0) {
-        EntityManager.GetBuffer<SpriteIndexBuffer>(renderInfos[i].bufferEntity).RemoveRange(size + 1 - toRemove, toRemove);
-        EntityManager.GetBuffer<MatrixBuffer>(renderInfos[i].bufferEntity).RemoveRange(size + 1 - toRemove, toRemove);
-        EntityManager.GetBuffer<SpriteColorBuffer>(renderInfos[i].bufferEntity).RemoveRange(size + 1 - toRemove, toRemove);
+        EntityManager.GetBuffer<SpriteIndexBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(size + 1 - toRemove, toRemove);
+        EntityManager.GetBuffer<MatrixBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(size + 1 - toRemove, toRemove);
+        EntityManager.GetBuffer<SpriteColorBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(size + 1 - toRemove, toRemove);
       }
     }
   }
-  void ClearDataBuffers(int bufferID) {
-    if(renderInfos[bufferID].matrixBuffer != null)
-      renderInfos[bufferID].matrixBuffer.Release();
-    if(renderInfos[bufferID].colorsBuffer != null)
-      renderInfos[bufferID].colorsBuffer.Release();
-    if(renderInfos[bufferID].uvBuffer != null)
-      renderInfos[bufferID].uvBuffer.Release();
-    if(renderInfos[bufferID].indexBuffer != null)
-      renderInfos[bufferID].indexBuffer.Release();
-  }
 
   int UpdateBuffers(int renderIndex) {
-    ClearDataBuffers(renderIndex);
-    SpriteSheetMaterial material = new SpriteSheetMaterial {
-      material = renderInfos[renderIndex].material
-    };
+    SpriteSheetManager.ReleaseBuffer(renderIndex);
 
-    /*
-    uvBufferQuery.SetFilter(material);
-    matrixBufferQuery.SetFilter(material);
-    indexBufferQuery.SetFilter(material);
-    colorBufferQuery.SetFilter(material);
-    */
-
-    int instanceCount = EntityManager.GetBuffer<SpriteIndexBuffer>(renderInfos[renderIndex].bufferEntity).Length;
+    RenderInformation renderInformation = SpriteSheetManager.renderInformation[renderIndex];
+    int instanceCount = EntityManager.GetBuffer<SpriteIndexBuffer>(renderInformation.bufferEntity).Length;
     if(instanceCount > 0) {
-      int stride = instanceCount >= 16 * renderInfos[renderIndex].spriteCount ? 1 : 16 * renderInfos[renderIndex].spriteCount;
-      renderInfos[renderIndex].uvBuffer = new ComputeBuffer(instanceCount, stride);
-      renderInfos[renderIndex].uvBuffer.SetData(EntityManager.GetBuffer<UvBuffer>(renderInfos[renderIndex].bufferEntity).Reinterpret<float4>().AsNativeArray());
-      renderInfos[renderIndex].material.SetBuffer("uvBuffer", renderInfos[renderIndex].uvBuffer);
+      int stride = instanceCount >= 16 * SpriteSheetManager.renderInformation[renderIndex].spriteCount ? 1 : 16 * renderInformation.spriteCount;
+      renderInformation.uvBuffer = new ComputeBuffer(instanceCount, stride);
+      renderInformation.uvBuffer.SetData(EntityManager.GetBuffer<UvBuffer>(renderInformation.bufferEntity).Reinterpret<float4>().AsNativeArray());
+      renderInformation.material.SetBuffer("uvBuffer", renderInformation.uvBuffer);
 
 
-      renderInfos[renderIndex].indexBuffer = new ComputeBuffer(instanceCount, sizeof(int));
-      renderInfos[renderIndex].indexBuffer.SetData(EntityManager.GetBuffer<SpriteIndexBuffer>(renderInfos[renderIndex].bufferEntity).Reinterpret<int>().AsNativeArray());
-      renderInfos[renderIndex].material.SetBuffer("indexBuffer", renderInfos[renderIndex].indexBuffer);
+      renderInformation.indexBuffer = new ComputeBuffer(instanceCount, sizeof(int));
+      renderInformation.indexBuffer.SetData(EntityManager.GetBuffer<SpriteIndexBuffer>(renderInformation.bufferEntity).Reinterpret<int>().AsNativeArray());
+      renderInformation.material.SetBuffer("indexBuffer", renderInformation.indexBuffer);
 
-      renderInfos[renderIndex].matrixBuffer = new ComputeBuffer(instanceCount, 16);
-      renderInfos[renderIndex].matrixBuffer.SetData(EntityManager.GetBuffer<MatrixBuffer>(renderInfos[renderIndex].bufferEntity).Reinterpret<float4>().AsNativeArray());
-      renderInfos[renderIndex].material.SetBuffer("matrixBuffer", renderInfos[renderIndex].matrixBuffer);
+      renderInformation.matrixBuffer = new ComputeBuffer(instanceCount, 16);
+      renderInformation.matrixBuffer.SetData(EntityManager.GetBuffer<MatrixBuffer>(renderInformation.bufferEntity).Reinterpret<float4>().AsNativeArray());
+      renderInformation.material.SetBuffer("matrixBuffer", renderInformation.matrixBuffer);
 
-      renderInfos[renderIndex].args[1] = (uint)instanceCount;
-      renderInfos[renderIndex].argsBuffer.SetData(renderInfos[renderIndex].args);
+      renderInformation.args[1] = (uint)instanceCount;
+      renderInformation.argsBuffer.SetData(renderInformation.args);
 
-      renderInfos[renderIndex].colorsBuffer = new ComputeBuffer(instanceCount, 16);
-      renderInfos[renderIndex].colorsBuffer.SetData(EntityManager.GetBuffer<SpriteColorBuffer>(renderInfos[renderIndex].bufferEntity).Reinterpret<float4>().AsNativeArray());
-      renderInfos[renderIndex].material.SetBuffer("colorsBuffer", renderInfos[renderIndex].colorsBuffer);
+      renderInformation.colorsBuffer = new ComputeBuffer(instanceCount, 16);
+      renderInformation.colorsBuffer.SetData(EntityManager.GetBuffer<SpriteColorBuffer>(renderInformation.bufferEntity).Reinterpret<float4>().AsNativeArray());
+      renderInformation.material.SetBuffer("colorsBuffer", renderInformation.colorsBuffer);
     }
     return instanceCount;
   }

@@ -5,14 +5,16 @@ using UnityEngine;
 
 public abstract class SpriteSheetManager {
   private static EntityManager entityManager;
+  public static List<RenderInformation> renderInformation = new List<RenderInformation>();
 
   public static EntityManager EntityManager {
     get {
       if(entityManager == null)
-        entityManager = World.Active.EntityManager;
+        entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
       return entityManager;
     }
   }
+
   public static Entity Instantiate(EntityArchetype archetype, List<IComponentData> componentDatas, string spriteSheetName) {
     Entity e = EntityManager.CreateEntity(archetype);
     Material material = SpriteSheetCache.GetMaterial(spriteSheetName);
@@ -48,5 +50,24 @@ public abstract class SpriteSheetManager {
     SpriteSheetMaterial material = new SpriteSheetMaterial { material = atlasData.Key };
     DynamicBufferManager.GenerateBuffers(material, spriteCount);
     DynamicBufferManager.BakeUvBuffer(material, atlasData);
+    renderInformation.Add(new RenderInformation(material.material, DynamicBufferManager.GetEntityBuffer(material.material)));
   }
+
+  public static void CleanBuffers() {
+    for(int i = 0; i < renderInformation.Count; i++)
+      renderInformation[i].DestroyBuffers();
+    renderInformation.Clear();
+  }
+
+  public static void ReleaseBuffer(int bufferID) {
+    if(renderInformation[bufferID].matrixBuffer != null)
+      renderInformation[bufferID].matrixBuffer.Release();
+    if(renderInformation[bufferID].colorsBuffer != null)
+      renderInformation[bufferID].colorsBuffer.Release();
+    if(renderInformation[bufferID].uvBuffer != null)
+      renderInformation[bufferID].uvBuffer.Release();
+    if(renderInformation[bufferID].indexBuffer != null)
+      renderInformation[bufferID].indexBuffer.Release();
+  }
+
 }

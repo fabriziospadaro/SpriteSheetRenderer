@@ -14,7 +14,7 @@ public static class DynamicBufferManager {
   public static EntityManager EntityManager {
     get {
       if(entityManager == null)
-        entityManager = World.Active.EntityManager;
+        entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
       return entityManager;
     }
   }

@@ -2,7 +2,7 @@
 using Unity.Mathematics;
 using UnityEngine.UI;
 using Unity.Entities;
-
+using System.Linq;
 public class EntitySpawner : MonoBehaviour {
   QuadTree qt = null;
   private Text spriteCount;
@@ -24,7 +24,7 @@ public class EntitySpawner : MonoBehaviour {
       screenPoint = Camera.main.ScreenToWorldPoint(screenPoint);
       qt.Insert(new float2(screenPoint.x, screenPoint.y));
     }
-    spriteCount.text = "Entity Count: " + (World.Active.EntityManager.Debug.EntityCount - 2).ToString();
+    spriteCount.text = "Entity Count: " + (World.DefaultGameObjectInjectionWorld.EntityManager.Debug.EntityCount - 2).ToString();
   }
   public void Subdivide() {
     qt.Insert(float2.zero, true);

@@ -13,7 +13,7 @@ public class SpriteManagerSystem : ComponentSystem {
         SpriteSheetManager.DestroyEntity(entity, "emoji");
       }
       else {
-        lifetime.Value -= Time.deltaTime;
+        lifetime.Value -= Time.DeltaTime;
       }
     });
   }
