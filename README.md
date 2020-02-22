@@ -105,7 +105,7 @@ for(int i = 0; i < entities.Length; i++) {
 }
 ```
 
-#Support
-###NaughtyAttributes is an open-source project that I am developing in my free time. If you like it you can support me by donating.
+# Support
+### NaughtyAttributes is an open-source project that I am developing in my free time. If you like it you can support me by donating.
 
 Buy Me A Coffee: https://www.buymeacoffee.com/LRTk8rn
