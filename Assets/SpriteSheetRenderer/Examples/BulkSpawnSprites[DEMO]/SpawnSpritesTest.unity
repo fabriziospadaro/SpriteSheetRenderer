@@ -213,8 +213,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 616669238}
-  - component: {fileID: 616669237}
   - component: {fileID: 616669236}
+  - component: {fileID: 616669237}
   m_Layer: 0
   m_Name: SpawnEntitiesArea
   m_TagString: Untagged
