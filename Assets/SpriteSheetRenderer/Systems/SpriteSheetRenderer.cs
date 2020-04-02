@@ -52,7 +52,8 @@ public class SpriteSheetRenderer : ComponentSystem {
     int instanceCount = EntityManager.GetBuffer<SpriteIndexBuffer>(renderInformation.bufferEntity).Length;
     if(instanceCount > 0) {
       //TODO: deve moltiplicare il numero di sprites per questa animazione
-      int stride = 16 * SpriteSheetCache.GetLenght(renderInformation.material);
+
+      int stride = instanceCount >= 16 ? 16 : 16 * SpriteSheetCache.GetLenght(renderInformation.material);
       renderInformation.uvBuffer = new ComputeBuffer(instanceCount, stride);
       renderInformation.uvBuffer.SetData(EntityManager.GetBuffer<UvBuffer>(renderInformation.bufferEntity).Reinterpret<float4>().AsNativeArray());
       renderInformation.material.SetBuffer("uvBuffer", renderInformation.uvBuffer);
