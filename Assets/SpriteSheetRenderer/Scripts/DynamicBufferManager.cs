@@ -19,7 +19,7 @@ public static class DynamicBufferManager {
     }
   }
   //list of all the "Enities with all the buffers"
-  //Each different material have a different Enity
+  //Each different material have a different bufferEnity
   private static List<Entity> bufferEntities = new List<Entity>();
   //contains the index of a bufferEntity inside the bufferEntities from a material
   private static Dictionary<Material, int> materialEntityBufferID = new Dictionary<Material, int>();

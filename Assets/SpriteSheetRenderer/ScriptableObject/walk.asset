@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d000e9c4364d3764c89516aaf73c46ea, type: 3}
+  m_Name: walk
+  m_EditorClassIdentifier: 
+  animationName: walk
+  sprites:
+  - {fileID: 3083089168873209362, guid: 57f6b6fe96601a14694379954154ba7c, type: 3}
+  - {fileID: -517894308114096243, guid: 57f6b6fe96601a14694379954154ba7c, type: 3}
+  - {fileID: 7755224123621818408, guid: 57f6b6fe96601a14694379954154ba7c, type: 3}
+  - {fileID: -3557554893070573299, guid: 57f6b6fe96601a14694379954154ba7c, type: 3}
+  startIndex: 0
+  playOnStart: 1
+  samples: 32
+  repetition: 1

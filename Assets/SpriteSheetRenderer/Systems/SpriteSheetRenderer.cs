@@ -21,7 +21,6 @@ public class SpriteSheetRenderer : ComponentSystem {
   }
   protected override void OnUpdate() {
 
-
     for(int i = 0; i < SpriteSheetManager.renderInformation.Count; i++) {
       if(UpdateBuffers(i) > 0)
         Graphics.DrawMeshInstancedIndirect(mesh, 0, SpriteSheetManager.renderInformation[i].material, new Bounds(Vector2.zero, Vector3.one), SpriteSheetManager.renderInformation[i].argsBuffer);
@@ -52,7 +51,8 @@ public class SpriteSheetRenderer : ComponentSystem {
     RenderInformation renderInformation = SpriteSheetManager.renderInformation[renderIndex];
     int instanceCount = EntityManager.GetBuffer<SpriteIndexBuffer>(renderInformation.bufferEntity).Length;
     if(instanceCount > 0) {
-      int stride = instanceCount >= 16 * SpriteSheetManager.renderInformation[renderIndex].spriteCount ? 1 : 16 * renderInformation.spriteCount;
+      //TODO: deve moltiplicare il numero di sprites per questa animazione
+      int stride = 16 * SpriteSheetCache.GetLenght(renderInformation.material);
       renderInformation.uvBuffer = new ComputeBuffer(instanceCount, stride);
       renderInformation.uvBuffer.SetData(EntityManager.GetBuffer<UvBuffer>(renderInformation.bufferEntity).Reinterpret<float4>().AsNativeArray());
       renderInformation.material.SetBuffer("uvBuffer", renderInformation.uvBuffer);
