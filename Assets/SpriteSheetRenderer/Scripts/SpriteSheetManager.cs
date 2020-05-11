@@ -51,14 +51,15 @@ public abstract class SpriteSheetManager {
     return e;
   }
 
-  public static void SetAnimation(Entity e, SpriteSheetAnimationData animation, string oldAnimation) {
+  public static void SetAnimation(Entity e, SpriteSheetAnimationData animation){
+    int bufferEnityID = EntityManager.GetComponentData<BufferHook>(e).bufferEnityID;
+    int bufferID = EntityManager.GetComponentData<BufferHook>(e).bufferID;
+    Material oldMaterial = DynamicBufferManager.GetMaterial(bufferEnityID);
+    string oldAnimation = SpriteSheetCache.GetMaterialName(oldMaterial);
     if(animation.animationName != oldAnimation) {
       Material material = SpriteSheetCache.GetMaterial(animation.animationName);
       var spriteSheetMaterial = new SpriteSheetMaterial { material = material };
-      var oldMaterial = EntityManager.GetSharedComponentData<SpriteSheetMaterial>(e).material;
 
-      //clean old buffer
-      int bufferID = EntityManager.GetComponentData<BufferHook>(e).bufferID;
       DynamicBufferManager.RemoveBuffer(oldMaterial, bufferID);
 
       //use new buffer
@@ -72,8 +73,33 @@ public abstract class SpriteSheetManager {
     EntityManager.SetComponentData(e, new SpriteIndex { Value = animation.startIndex });
   }
 
+  public static void SetAnimation(EntityCommandBuffer commandBuffer, Entity e, SpriteSheetAnimationData animation, BufferHook hook){
+    Material oldMaterial = DynamicBufferManager.GetMaterial(hook.bufferEnityID);
+    string oldAnimation = SpriteSheetCache.GetMaterialName(oldMaterial);
+    if(animation.animationName != oldAnimation) {
+      Material material = SpriteSheetCache.GetMaterial(animation.animationName);
+      var spriteSheetMaterial = new SpriteSheetMaterial { material = material };
+
+      //clean old buffer
+      DynamicBufferManager.RemoveBuffer(oldMaterial, hook.bufferID);
+
+      //use new buffer
+      int bufferID = DynamicBufferManager.AddDynamicBuffers(DynamicBufferManager.GetEntityBuffer(material), material);
+      BufferHook bh = new BufferHook { bufferID = bufferID, bufferEnityID = DynamicBufferManager.GetEntityBufferID(spriteSheetMaterial) };
+
+      commandBuffer.SetSharedComponent(e, spriteSheetMaterial);
+      commandBuffer.SetComponent(e, bh);
+    }
+    commandBuffer.SetComponent(e, new SpriteSheetAnimation { maxSprites = animation.sprites.Length, play = animation.playOnStart, samples = animation.samples, repetition = animation.repetition, elapsedFrames = 0 });
+    commandBuffer.SetComponent(e, new SpriteIndex { Value = animation.startIndex });
+  }
+
   public static void UpdateEntity(Entity entity, IComponentData componentData) {
     EntityManager.SetComponentData(entity, (dynamic)componentData);
+  }
+
+  public static void UpdateEntity(EntityCommandBuffer commandBuffer,Entity entity, IComponentData componentData){
+    commandBuffer.SetComponent(entity, (dynamic)componentData);
   }
 
   public static void DestroyEntity(Entity e, string materialName) {
@@ -83,9 +109,10 @@ public abstract class SpriteSheetManager {
     EntityManager.DestroyEntity(e);
   }
 
-  public static void DestroyEntity(Entity e, Material material, int bufferID) {
-    EntityManager.DestroyEntity(e);
-    DynamicBufferManager.RemoveBuffer(material, bufferID);
+  public static void DestroyEntity(EntityCommandBuffer commandBuffer, Entity e, BufferHook hook) {
+    commandBuffer.DestroyEntity(e);
+    Material material = DynamicBufferManager.GetMaterial(hook.bufferEnityID);
+    DynamicBufferManager.RemoveBuffer(material, hook.bufferID);
   }
 
   public static void RecordSpriteSheet(Sprite[] sprites, string spriteSheetName, int spriteCount = 0) {
@@ -111,14 +138,17 @@ public abstract class SpriteSheetManager {
       renderInformation[i].DestroyBuffers();
     renderInformation.Clear();
   }
-
+  public static void ReleaseUvBuffer(int bufferID) {
+    if(renderInformation[bufferID].uvBuffer != null)
+      renderInformation[bufferID].uvBuffer.Release();
+  }
   public static void ReleaseBuffer(int bufferID) {
     if(renderInformation[bufferID].matrixBuffer != null)
       renderInformation[bufferID].matrixBuffer.Release();
     if(renderInformation[bufferID].colorsBuffer != null)
       renderInformation[bufferID].colorsBuffer.Release();
-    if(renderInformation[bufferID].uvBuffer != null)
-      renderInformation[bufferID].uvBuffer.Release();
+    //if(renderInformation[bufferID].uvBuffer != null)
+      //renderInformation[bufferID].uvBuffer.Release();
     if(renderInformation[bufferID].indexBuffer != null)
       renderInformation[bufferID].indexBuffer.Release();
   }

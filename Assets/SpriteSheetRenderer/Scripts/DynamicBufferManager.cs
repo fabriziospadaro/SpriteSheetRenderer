@@ -105,15 +105,19 @@ public static class DynamicBufferManager {
     ids.Add(smallerID);
     return smallerID;
   }
-
-
+  public static Material GetMaterial(int bufferEntityID) {
+    foreach(KeyValuePair<Material, int> e in materialEntityBufferID)
+      if(e.Value == bufferEntityID)
+        return e.Key;
+    return null;
+  }
   public static void RemoveBuffer(Material material, int bufferID) {
     Entity bufferEntity = GetEntityBuffer(material);
     availableEntityID[material].Remove(bufferID);
-    CleanBuffer(material, bufferID, bufferEntity);
+    CleanBuffer(bufferID, bufferEntity);
   }
 
-  private static void CleanBuffer(Material material, int bufferID, Entity bufferEntity) {
+  private static void CleanBuffer(int bufferID, Entity bufferEntity) {
     EntityManager.GetBuffer<SpriteIndexBuffer>(bufferEntity).RemoveAt(bufferID);
     EntityManager.GetBuffer<MatrixBuffer>(bufferEntity).RemoveAt(bufferID);
     EntityManager.GetBuffer<SpriteColorBuffer>(bufferEntity).RemoveAt(bufferID);

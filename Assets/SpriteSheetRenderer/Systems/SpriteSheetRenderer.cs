@@ -1,19 +1,10 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Unity.Entities;
-using Unity.Burst;
-using Unity.Jobs;
-using Unity.Collections;
 using Unity.Mathematics;
-using Unity.Collections.LowLevel.Unsafe;
-using System.Linq;
 public class SpriteSheetRenderer : ComponentSystem {
   private Mesh mesh;
-
-  int shaderPropertyId;
   protected override void OnCreate() {
     mesh = MeshExtension.Quad();
-    shaderPropertyId = Shader.PropertyToID("_MainText_UV");
   }
 
   protected override void OnDestroy() {
@@ -25,7 +16,7 @@ public class SpriteSheetRenderer : ComponentSystem {
       if(UpdateBuffers(i) > 0)
         Graphics.DrawMeshInstancedIndirect(mesh, 0, SpriteSheetManager.renderInformation[i].material, new Bounds(Vector2.zero, Vector3.one), SpriteSheetManager.renderInformation[i].argsBuffer);
 
-      //this is just a wip to clean the old buffers
+      //this is w.i.p to clean the old buffers
       DynamicBuffer<SpriteIndexBuffer> indexBuffer = EntityManager.GetBuffer<SpriteIndexBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity);
       int size = indexBuffer.Length - 1;
       int toRemove = 0;
@@ -44,20 +35,21 @@ public class SpriteSheetRenderer : ComponentSystem {
       }
     }
   }
-
+      //we should only update the index of the changed datas for index buffer,matrixbuffer and color buffer inside a burst job to avoid overhead
   int UpdateBuffers(int renderIndex) {
     SpriteSheetManager.ReleaseBuffer(renderIndex);
 
     RenderInformation renderInformation = SpriteSheetManager.renderInformation[renderIndex];
     int instanceCount = EntityManager.GetBuffer<SpriteIndexBuffer>(renderInformation.bufferEntity).Length;
     if(instanceCount > 0) {
-      //TODO: deve moltiplicare il numero di sprites per questa animazione
-
       int stride = instanceCount >= 16 ? 16 : 16 * SpriteSheetCache.GetLenght(renderInformation.material);
-      renderInformation.uvBuffer = new ComputeBuffer(instanceCount, stride);
-      renderInformation.uvBuffer.SetData(EntityManager.GetBuffer<UvBuffer>(renderInformation.bufferEntity).Reinterpret<float4>().AsNativeArray());
-      renderInformation.material.SetBuffer("uvBuffer", renderInformation.uvBuffer);
-
+      if(renderInformation.updateUvs) {
+        SpriteSheetManager.ReleaseUvBuffer(renderIndex);
+        renderInformation.uvBuffer = new ComputeBuffer(instanceCount, stride);
+        renderInformation.uvBuffer.SetData(EntityManager.GetBuffer<UvBuffer>(renderInformation.bufferEntity).Reinterpret<float4>().AsNativeArray());
+        renderInformation.material.SetBuffer("uvBuffer", renderInformation.uvBuffer);
+        renderInformation.updateUvs = false;
+      }
 
       renderInformation.indexBuffer = new ComputeBuffer(instanceCount, sizeof(int));
       renderInformation.indexBuffer.SetData(EntityManager.GetBuffer<SpriteIndexBuffer>(renderInformation.bufferEntity).Reinterpret<int>().AsNativeArray());

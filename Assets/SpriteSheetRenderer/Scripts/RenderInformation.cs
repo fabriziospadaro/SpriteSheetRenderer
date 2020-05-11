@@ -11,7 +11,7 @@ public class RenderInformation {
   public int spriteCount;
   public Material material;
   public uint[] args;
-
+  public bool updateUvs;
   public RenderInformation(Material material, Entity bufferEntity) {
     this.material = material;
     spriteCount = SpriteSheetCache.GetLenght(material);
@@ -21,6 +21,7 @@ public class RenderInformation {
     //thoose args are always the same since we always use the same mesh
     args[0] = (uint)6;
     args[2] = args[3] = (uint)0;
+    updateUvs = true;
   }
 
   public void DestroyBuffers() {
