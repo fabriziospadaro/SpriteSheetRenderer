@@ -2,6 +2,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-public struct SpriteSheetColor : IComponentData {
-  public float4 color;
+public struct SpriteSheetColor : IComponentData
+{
+    public float4 color;
 }

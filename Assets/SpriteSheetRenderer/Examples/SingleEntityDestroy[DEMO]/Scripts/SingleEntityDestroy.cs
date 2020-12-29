@@ -5,13 +5,15 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
-public class SingleEntityDestroy : MonoBehaviour, IConvertGameObjectToEntity {
-  public Sprite[] sprites;
-  EntityArchetype archetype;
+public class SingleEntityDestroy : MonoBehaviour, IConvertGameObjectToEntity
+{
+    public Sprite[] sprites;
+    EntityArchetype archetype;
 
-  public void Convert(Entity entity, EntityManager eManager, GameObjectConversionSystem conversionSystem) {
-    //Record and bake this spritesheets(only once)
-    archetype = eManager.CreateArchetype(
+    public void Convert(Entity entity, EntityManager eManager, GameObjectConversionSystem conversionSystem)
+    {
+        //Record and bake this spritesheets(only once)
+        archetype = eManager.CreateArchetype(
             typeof(Position2D),
             typeof(Rotation2D),
             typeof(Scale),
@@ -23,16 +25,18 @@ public class SingleEntityDestroy : MonoBehaviour, IConvertGameObjectToEntity {
             typeof(SpriteSheetColor),
             typeof(SpriteMatrix),
             typeof(BufferHook)
-         );
-    SpriteSheetManager.RecordSpriteSheet(sprites, "emoji");
-  }
-  void Update() {
-    if(Input.GetKeyDown(KeyCode.Space)) {
-      int maxSprites = SpriteSheetCache.GetLength("emoji");
-      var color = UnityEngine.Random.ColorHSV(.35f, .85f);
+        );
+        SpriteSheetManager.RecordSpriteSheet(sprites, "emoji");
+    }
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            int maxSprites = SpriteSheetCache.GetLength("emoji");
+            var color = UnityEngine.Random.ColorHSV(.35f, .85f);
 
-      // 3) Populate components
-      List<IComponentData> components = new List<IComponentData> {
+            // 3) Populate components
+            List<IComponentData> components = new List<IComponentData> {
         new Position2D { Value = UnityEngine.Random.insideUnitCircle * 7 },
         new Scale { Value = UnityEngine.Random.Range(0,3f) },
         new SpriteIndex { Value = UnityEngine.Random.Range(0, maxSprites) },
@@ -41,7 +45,7 @@ public class SingleEntityDestroy : MonoBehaviour, IConvertGameObjectToEntity {
         new LifeTime{ Value = UnityEngine.Random.Range(5,15)}
       };
 
-      SpriteSheetManager.Instantiate(archetype, components, "emoji");
+            SpriteSheetManager.Instantiate(archetype, components, "emoji");
+        }
     }
-  }
 }

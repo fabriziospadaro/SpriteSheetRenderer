@@ -42,7 +42,7 @@ public class SpriteSheetRenderer : ComponentSystem {
     RenderInformation renderInformation = SpriteSheetManager.renderInformation[renderIndex];
     int instanceCount = EntityManager.GetBuffer<SpriteIndexBuffer>(renderInformation.bufferEntity).Length;
     if(instanceCount > 0) {
-      int stride = instanceCount >= 16 ? 16 : 16 * SpriteSheetCache.GetLenght(renderInformation.material);
+      int stride = instanceCount >= 16 ? 16 : 16 * SpriteSheetCache.GetLength(renderInformation.material);
       if(renderInformation.updateUvs) {
         SpriteSheetManager.ReleaseUvBuffer(renderIndex);
         renderInformation.uvBuffer = new ComputeBuffer(instanceCount, stride);

@@ -43,6 +43,6 @@ public static class SpriteSheetCache
 
     public static SpriteSheetAnimator GetAnimator(Entity e) => entityAnimator[e];
     public static string GetMaterialName(Material material) => materialToName[material];
-    public static int GetLenght(Material material) => GetLength(GetMaterialName(material));
+    public static int GetLength(Material material) => GetLength(GetMaterialName(material));
 
 }
