@@ -6,23 +6,23 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
-public class MatrixBufferSystem : SystemBase
+public class SpriteIndexBufferSystem : SystemBase
 {
     protected override void OnUpdate()
     {
-        var buffers = DynamicBufferManager.GetMatrixBuffers();
+        var buffers = DynamicBufferManager.GetIndexBuffers();
 
         for (int bufferID = 0; bufferID < buffers.Length; bufferID++)
         {
-            DynamicBuffer<MatrixBuffer> buffer = buffers[bufferID];
+            DynamicBuffer<SpriteIndexBuffer> buffer = buffers[bufferID];
             Dependency = Entities
                 .WithBurst()
                 .WithNativeDisableContainerSafetyRestriction(buffer)
-                .ForEach((in SpriteMatrix spriteMatrix, in BufferHook bufferHook) =>
+                .ForEach((in SpriteIndex spriteIndex, in BufferHook bufferHook) =>
                 {
                     if (bufferID == bufferHook.bufferEntityID)
                     {
-                        buffer[bufferHook.bufferID] = spriteMatrix.matrix;
+                        buffer[bufferHook.bufferID] = spriteIndex.Value;
                     }
                 })
                 .ScheduleParallel(Dependency);
