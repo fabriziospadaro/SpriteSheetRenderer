@@ -13,6 +13,7 @@ namespace ECSSpriteSheetAnimation.Examples
         public int spriteCount = 5000;
         public Sprite[] sprites;
         public float2 spawnArea = new float2(100, 100);
+
         Rect GetSpawnArea()
         {
             Rect r = new Rect(0, 0, spawnArea.x, spawnArea.y);
@@ -61,6 +62,7 @@ namespace ECSSpriteSheetAnimation.Examples
                 eManager.SetSharedComponentData(e, material);
             }
         }
+
         private void OnDrawGizmosSelected()
         {
             var r = GetSpawnArea();

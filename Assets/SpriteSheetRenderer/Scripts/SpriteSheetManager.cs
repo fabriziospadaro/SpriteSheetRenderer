@@ -170,5 +170,4 @@ public abstract class SpriteSheetManager
         if (renderInformation[bufferID].indexBuffer != null)
             renderInformation[bufferID].indexBuffer.Release();
     }
-
 }

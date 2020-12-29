@@ -21,6 +21,7 @@ public static class DynamicBufferManager
             return entityManager;
         }
     }
+
     //list of all the "Enities with all the buffers"
     //Each different material have a different bufferEntity
     private static List<Entity> bufferEntities = new List<Entity>();
@@ -120,6 +121,7 @@ public static class DynamicBufferManager
         ids.Add(smallerID);
         return smallerID;
     }
+
     public static Material GetMaterial(int bufferEntityID)
     {
         foreach (KeyValuePair<Material, int> e in materialEntityBufferID)
@@ -127,6 +129,7 @@ public static class DynamicBufferManager
                 return e.Key;
         return null;
     }
+
     public static void RemoveBuffer(Material material, int bufferID)
     {
         Entity bufferEntity = GetEntityBuffer(material);
@@ -173,5 +176,4 @@ public static class DynamicBufferManager
             buffers[i] = EntityManager.GetBuffer<UvBuffer>(bufferEntities[i]);
         return buffers;
     }
-
 }

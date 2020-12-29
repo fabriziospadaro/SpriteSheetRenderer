@@ -75,5 +75,4 @@ public class QuadTree
             tree[3].Insert(pos, force);
         }
     }
-
 }

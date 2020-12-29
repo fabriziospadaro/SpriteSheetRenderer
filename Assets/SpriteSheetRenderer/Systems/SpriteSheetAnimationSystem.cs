@@ -3,53 +3,44 @@ using Unity.Burst;
 using Unity.Jobs;
 using UnityEngine;
 
-public class SpriteSheetAnimationSystem : JobComponentSystem
+public class SpriteSheetAnimationSystem : SystemBase
 {
-    [BurstCompile]
-    struct SpriteSheetAnimationJob : IJobForEach<SpriteSheetAnimation, SpriteIndex>
+    protected override void OnUpdate()
     {
-
-        public void Execute(ref SpriteSheetAnimation AnimCmp, ref SpriteIndex spriteSheetCmp)
-        {
-            if (AnimCmp.play && AnimCmp.elapsedFrames % AnimCmp.samples == 0 && AnimCmp.elapsedFrames != 0)
+        Dependency = Entities
+            .WithBurst()
+            .ForEach((ref SpriteSheetAnimation animation, ref SpriteIndex spriteIndex) =>
             {
-                switch (AnimCmp.repetition)
+                if (animation.play && animation.elapsedFrames % animation.samples == 0 && animation.elapsedFrames != 0)
                 {
-                    case SpriteSheetAnimation.RepetitionType.Once:
-                        if (!NextWillReachEnd(AnimCmp, spriteSheetCmp))
-                        {
-                            spriteSheetCmp.Value += 1;
-                        }
-                        else
-                        {
-                            AnimCmp.play = false;
-                            AnimCmp.elapsedFrames = 0;
-                        }
-                        break;
-                    case SpriteSheetAnimation.RepetitionType.Loop:
-                        if (NextWillReachEnd(AnimCmp, spriteSheetCmp))
-                            spriteSheetCmp.Value = 0;
-                        else
-                            spriteSheetCmp.Value += 1;
-                        break;
+                    switch (animation.repetition)
+                    {
+                        case SpriteSheetAnimation.RepetitionType.Once:
+                            if (spriteIndex.Value + 1 < animation.maxSprites)
+                            {
+                                spriteIndex.Value += 1;
+                            }
+                            else
+                            {
+                                animation.play = false;
+                            }
+                            break;
+                        case SpriteSheetAnimation.RepetitionType.Loop:
+                            spriteIndex.Value = spriteIndex.Value + 1 >= animation.maxSprites ? 0 : spriteIndex.Value + 1;
+                            break;
+                    }
+                    animation.elapsedFrames = 0;
                 }
-                AnimCmp.elapsedFrames = 0;
-            }
-            else if (AnimCmp.play)
-            {
-                AnimCmp.elapsedFrames += 1;
-            }
-        }
-        public bool NextWillReachEnd(SpriteSheetAnimation anim, SpriteIndex sprite)
-        {
-            return sprite.Value + 1 >= anim.maxSprites;
-        }
+                else if (animation.play)
+                {
+                    animation.elapsedFrames += 1;
+                }
+            })
+            .Schedule(Dependency);
     }
 
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    public static bool NextWillReachEnd(SpriteSheetAnimation animation, SpriteIndex spriteIndex)
     {
-        var job = new SpriteSheetAnimationJob();
-        return job.Schedule(this, inputDeps);
+        return spriteIndex.Value + 1 >= animation.maxSprites;
     }
 }
-

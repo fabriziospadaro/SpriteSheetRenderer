@@ -39,10 +39,12 @@ public static class SpriteSheetCache
     public static int TotalLength() => materialNameMaterial.Count;
 
     public static int GetLength(string spriteSheetName) => materialNameMaterial[spriteSheetName].Value;
+
     public static Material GetMaterial(string spriteSheetName) => materialNameMaterial[spriteSheetName].Key;
 
     public static SpriteSheetAnimator GetAnimator(Entity e) => entityAnimator[e];
-    public static string GetMaterialName(Material material) => materialToName[material];
-    public static int GetLength(Material material) => GetLength(GetMaterialName(material));
 
+    public static string GetMaterialName(Material material) => materialToName[material];
+
+    public static int GetLength(Material material) => GetLength(GetMaterialName(material));
 }

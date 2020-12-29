@@ -9,30 +9,58 @@ using UnityEngine;
 public class ColorBufferSystem : JobComponentSystem
 {
     [BurstCompile]
-    struct UpdateJob : IJobForEach<SpriteSheetColor, BufferHook>
+    private struct UpdateJobChunk : IJobChunk
     {
         [NativeDisableParallelForRestriction]
         public DynamicBuffer<SpriteColorBuffer> indexBuffer;
         [ReadOnly]
         public int bufferEntityID;
-        public void Execute([ReadOnly, ChangedFilter] ref SpriteSheetColor data, [ReadOnly] ref BufferHook hook)
+
+        [ReadOnly]
+        public ComponentTypeHandle<SpriteSheetColor> data;
+        [ReadOnly]
+        public ComponentTypeHandle<BufferHook> hook;
+
+        public void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex)
         {
-            if (bufferEntityID == hook.bufferEntityID)
-                indexBuffer[hook.bufferID] = data.color;
+            var chunkSpriteMatrix = chunk.GetNativeArray(data);
+            var chunkBufferHooks = chunk.GetNativeArray(hook);
+
+            for (int i = 0; i < chunk.Count; i++)
+            {
+                if (bufferEntityID == chunkBufferHooks[i].bufferEntityID)
+                {
+                    indexBuffer[chunkBufferHooks[i].bufferID] = chunkSpriteMatrix[i].color;
+                }
+            }
         }
+    }
+
+    private EntityQuery m_EntityQuery;
+
+    protected override void OnCreate()
+    {
+        base.OnCreate();
+
+        m_EntityQuery = GetEntityQuery(
+            ComponentType.ReadOnly<SpriteSheetColor>(),
+            ComponentType.ReadOnly<BufferHook>());
+        m_EntityQuery.SetChangedVersionFilter(ComponentType.ReadOnly<SpriteSheetColor>());
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         var buffers = DynamicBufferManager.GetColorBuffers();
-        NativeArray<JobHandle> jobs = new NativeArray<JobHandle>(buffers.Length, Allocator.TempJob);
+        NativeArray<JobHandle> jobs = new NativeArray<JobHandle>(buffers.Length, Allocator.Temp);
         for (int i = 0; i < buffers.Length; i++)
         {
-            inputDeps = new UpdateJob()
+            inputDeps = new UpdateJobChunk()
             {
                 indexBuffer = buffers[i],
-                bufferEntityID = i
-            }.Schedule(this, inputDeps);
+                bufferEntityID = i,
+                data = GetComponentTypeHandle<SpriteSheetColor>(isReadOnly: true),
+                hook = GetComponentTypeHandle<BufferHook>(isReadOnly: true)
+            }.Schedule(m_EntityQuery, inputDeps);
             jobs[i] = inputDeps;
         }
         JobHandle.CompleteAll(jobs);

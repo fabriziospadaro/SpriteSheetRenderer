@@ -4,20 +4,17 @@ using Unity.Jobs;
 using Unity.Collections;
 using Unity.Transforms;
 
-public class SpriteSheetScaleSystem : JobComponentSystem
+public class SpriteSheetScaleSystem : SystemBase
 {
-    [BurstCompile]
-    struct SpriteSheetScaleJob : IJobForEach<Scale, SpriteMatrix>
+    protected override void OnUpdate()
     {
-        public void Execute([ReadOnly][ChangedFilter] ref Scale scale, ref SpriteMatrix renderData)
-        {
-            renderData.matrix.w = scale.Value;
-        }
-    }
-
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
-    {
-        var job = new SpriteSheetScaleJob() { };
-        return job.Schedule(this, inputDeps);
+        Dependency = Entities
+            .WithBurst()
+            .WithChangeFilter<Scale>()
+            .ForEach((ref SpriteMatrix renderData, in Scale scale) =>
+            {
+                renderData.matrix.w = scale.Value;
+            })
+            .Schedule(Dependency);
     }
 }
