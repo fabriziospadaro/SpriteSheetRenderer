@@ -15,6 +15,6 @@ public class Bound2DSystem : SystemBase
                 bound.scale = scale.Value;
                 bound.position = translation.Value;
             })
-            .Schedule(Dependency);
+            .ScheduleParallel(Dependency);
     }
 }

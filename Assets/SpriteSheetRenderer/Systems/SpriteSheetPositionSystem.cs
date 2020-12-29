@@ -16,6 +16,6 @@ public class SpriteSheetPositionSystem : SystemBase
                 renderData.matrix.x = translation.Value.x;
                 renderData.matrix.y = translation.Value.y;
             })
-            .Schedule(Dependency);
+            .ScheduleParallel(Dependency);
     }
 }

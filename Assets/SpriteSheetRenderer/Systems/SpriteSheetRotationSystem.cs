@@ -13,6 +13,6 @@ public class SpriteSheetRotationSystem : SystemBase
             {
                 renderData.matrix.z = rotation.angle;
             })
-            .Schedule(Dependency);
+            .ScheduleParallel(Dependency);
     }
 }

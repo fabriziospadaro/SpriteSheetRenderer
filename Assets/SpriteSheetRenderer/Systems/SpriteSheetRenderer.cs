@@ -1,9 +1,12 @@
 ﻿using UnityEngine;
 using Unity.Entities;
 using Unity.Mathematics;
+
+[UpdateInGroup(typeof(PresentationSystemGroup))]
 public class SpriteSheetRenderer : ComponentSystem
 {
     private Mesh mesh;
+
     protected override void OnCreate()
     {
         mesh = MeshExtension.Quad();
@@ -13,6 +16,7 @@ public class SpriteSheetRenderer : ComponentSystem
     {
         SpriteSheetManager.CleanBuffers();
     }
+
     protected override void OnUpdate()
     {
 
@@ -44,6 +48,7 @@ public class SpriteSheetRenderer : ComponentSystem
             }
         }
     }
+
     //we should only update the index of the changed datas for index buffer,matrixbuffer and color buffer inside a burst job to avoid overhead
     int UpdateBuffers(int renderIndex)
     {

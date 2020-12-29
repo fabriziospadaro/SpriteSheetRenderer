@@ -15,6 +15,6 @@ public class SpriteSheetScaleSystem : SystemBase
             {
                 renderData.matrix.w = scale.Value;
             })
-            .Schedule(Dependency);
+            .ScheduleParallel(Dependency);
     }
 }

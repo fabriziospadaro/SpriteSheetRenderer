@@ -36,7 +36,7 @@ public class SpriteSheetAnimationSystem : SystemBase
                     animation.elapsedFrames += 1;
                 }
             })
-            .Schedule(Dependency);
+            .ScheduleParallel(Dependency);
     }
 
     public static bool NextWillReachEnd(SpriteSheetAnimation animation, SpriteIndex spriteIndex)
