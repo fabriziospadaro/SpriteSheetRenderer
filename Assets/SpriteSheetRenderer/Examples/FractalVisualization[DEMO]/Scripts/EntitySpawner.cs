@@ -31,7 +31,7 @@ public class EntitySpawner : MonoBehaviour
             screenPoint = Camera.main.ScreenToWorldPoint(screenPoint);
             qt.Insert(new float2(screenPoint.x, screenPoint.y));
         }
-        spriteCount.text = "Entity Count: " + (World.DefaultGameObjectInjectionWorld.EntityManager.Debug.EntityCount - 2).ToString();
+        spriteCount.text = "Entity Count: " + (World.DefaultGameObjectInjectionWorld.EntityManager.Debug.EntityCount - 3).ToString();
     }
 
     public void Subdivide()
