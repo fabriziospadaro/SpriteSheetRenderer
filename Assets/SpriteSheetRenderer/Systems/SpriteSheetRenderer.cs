@@ -19,32 +19,35 @@ public class SpriteSheetRenderer : ComponentSystem
 
     protected override void OnUpdate()
     {
-
         for (int i = 0; i < SpriteSheetManager.renderInformation.Count; i++)
         {
             if (UpdateBuffers(i) > 0)
-                Graphics.DrawMeshInstancedIndirect(mesh, 0, SpriteSheetManager.renderInformation[i].material, new Bounds(Vector2.zero, Vector3.one), SpriteSheetManager.renderInformation[i].argsBuffer);
+                Graphics.DrawMeshInstancedIndirect(mesh, 0, SpriteSheetManager.renderInformation[i].material, new Bounds(Vector3.zero, Vector3.one), SpriteSheetManager.renderInformation[i].argsBuffer);
 
             //this is w.i.p to clean the old buffers
             DynamicBuffer<SpriteIndexBuffer> indexBuffer = EntityManager.GetBuffer<SpriteIndexBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity);
-            int size = indexBuffer.Length - 1;
-            int toRemove = 0;
-            for (int j = size; j >= 0; j--)
+            int start = indexBuffer.Length - 1;
+            while (start >= 0 && indexBuffer[start].index == -1)
             {
-                if (indexBuffer[j].index == -1)
-                {
-                    toRemove++;
-                }
-                else
-                {
-                    break;
-                }
+                start--;
             }
+            int toRemove = indexBuffer.Length - 1 - start;
+            //for (int j = start; j >= 0; j--)
+            //{
+            //    if (indexBuffer[j].index == -1)
+            //    {
+            //        toRemove++;
+            //    }
+            //    else
+            //    {
+            //        break;
+            //    }
+            //}
             if (toRemove > 0)
             {
-                EntityManager.GetBuffer<SpriteIndexBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(size + 1 - toRemove, toRemove);
-                EntityManager.GetBuffer<MatrixBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(size + 1 - toRemove, toRemove);
-                EntityManager.GetBuffer<SpriteColorBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(size + 1 - toRemove, toRemove);
+                EntityManager.GetBuffer<SpriteIndexBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(start + 1 - toRemove, toRemove);
+                EntityManager.GetBuffer<MatrixBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(start + 1 - toRemove, toRemove);
+                EntityManager.GetBuffer<SpriteColorBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(start + 1 - toRemove, toRemove);
             }
         }
     }
