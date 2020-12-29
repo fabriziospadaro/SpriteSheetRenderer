@@ -1,8 +1,18 @@
 # SpriteSheetRenderer
 A powerful Unity ECS system to render massive numbers of animated sprites using DynamicBuffers and ComputeBuffer:
-##### 1 million animated sprites were rendered at 60fps on a Mid-2015 MacBook Pro.
-![N|Solid](https://forum.unity.com/proxy.php?image=https%3A%2F%2Fi.imgur.com%2FzRSWhy0.png&hash=754bc4b4187e2d72ce0eb2c578b996dc)
-## C# 4 required
+
+## Version
+Unity 2020.2
+
+Burst 1.4.3
+
+Collections 0.14.0-preview.16
+
+Entities 0.16.0-preview.21
+
+Jobs 0.7.0-preview.17
+
+Mathematics 1.2.1
 
 ### How to use (SINGLE INSTANTIATE):
 * 1- Create the Archetype:
@@ -104,8 +114,3 @@ for(int i = 0; i < entities.Length; i++) {
   eManager.SetSharedComponentData(e, material);
 }
 ```
-
-# Support
-### SpriteSheetRenderer is an open-source project that I am developing in my free time. If you like it you can support me by donating.
-
-Buy Me A Coffee: https://www.buymeacoffee.com/LRTk8rn
