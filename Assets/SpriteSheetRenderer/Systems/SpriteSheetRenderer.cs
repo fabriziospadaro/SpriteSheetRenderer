@@ -31,23 +31,14 @@ public class SpriteSheetRenderer : ComponentSystem
             {
                 start--;
             }
-            int toRemove = indexBuffer.Length - 1 - start;
-            //for (int j = start; j >= 0; j--)
-            //{
-            //    if (indexBuffer[j].index == -1)
-            //    {
-            //        toRemove++;
-            //    }
-            //    else
-            //    {
-            //        break;
-            //    }
-            //}
+
+            start++;
+            int toRemove = indexBuffer.Length - start;
             if (toRemove > 0)
             {
-                EntityManager.GetBuffer<SpriteIndexBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(start + 1 - toRemove, toRemove);
-                EntityManager.GetBuffer<MatrixBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(start + 1 - toRemove, toRemove);
-                EntityManager.GetBuffer<SpriteColorBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(start + 1 - toRemove, toRemove);
+                EntityManager.GetBuffer<SpriteIndexBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(start, toRemove);
+                EntityManager.GetBuffer<MatrixBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(start, toRemove);
+                EntityManager.GetBuffer<SpriteColorBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(start, toRemove);
             }
         }
     }
