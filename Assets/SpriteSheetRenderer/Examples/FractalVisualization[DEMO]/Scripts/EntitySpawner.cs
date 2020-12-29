@@ -4,38 +4,41 @@ using UnityEngine.UI;
 using Unity.Entities;
 using System.Linq;
 
-public class EntitySpawner : MonoBehaviour
+namespace ECSSpriteSheetAnimation.Examples
 {
-    QuadTree qt = null;
-    private Text spriteCount;
-
-    private void Start()
+    public class EntitySpawner : MonoBehaviour
     {
-        qt = FractalInitializer.qt;
-        spriteCount = GameObject.Find("EntityCount").GetComponent<Text>();
-    }
+        QuadTree qt = null;
+        private Text spriteCount;
 
-    public void Update()
-    {
-        if (Input.GetMouseButton(0))
+        private void Start()
         {
-            var screenPoint = Input.mousePosition;
-            screenPoint.z = 10.0f; //distance of the plane from the camera
-            screenPoint = Camera.main.ScreenToWorldPoint(screenPoint);
-            qt.Insert(new float2(screenPoint.x, screenPoint.y));
+            qt = FractalInitializer.qt;
+            spriteCount = GameObject.Find("EntityCount").GetComponent<Text>();
         }
-        if (Input.GetMouseButtonDown(1))
-        {
-            var screenPoint = Input.mousePosition;
-            screenPoint.z = 10.0f; //distance of the plane from the camera
-            screenPoint = Camera.main.ScreenToWorldPoint(screenPoint);
-            qt.Insert(new float2(screenPoint.x, screenPoint.y));
-        }
-        spriteCount.text = "Entity Count: " + (World.DefaultGameObjectInjectionWorld.EntityManager.Debug.EntityCount - 3).ToString();
-    }
 
-    public void Subdivide()
-    {
-        qt.Insert(float2.zero, true);
-    }
+        public void Update()
+        {
+            if (Input.GetMouseButton(0))
+            {
+                var screenPoint = Input.mousePosition;
+                screenPoint.z = 10.0f; //distance of the plane from the camera
+                screenPoint = Camera.main.ScreenToWorldPoint(screenPoint);
+                qt.Insert(new float2(screenPoint.x, screenPoint.y));
+            }
+            if (Input.GetMouseButtonDown(1))
+            {
+                var screenPoint = Input.mousePosition;
+                screenPoint.z = 10.0f; //distance of the plane from the camera
+                screenPoint = Camera.main.ScreenToWorldPoint(screenPoint);
+                qt.Insert(new float2(screenPoint.x, screenPoint.y));
+            }
+            spriteCount.text = "Entity Count: " + (World.DefaultGameObjectInjectionWorld.EntityManager.Debug.EntityCount - 3).ToString();
+        }
+
+        public void Subdivide()
+        {
+            qt.Insert(float2.zero, true);
+        }
+    } 
 }

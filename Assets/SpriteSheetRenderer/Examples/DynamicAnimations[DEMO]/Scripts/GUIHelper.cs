@@ -2,10 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GUIHelper : MonoBehaviour
+namespace ECSSpriteSheetAnimation.Examples
 {
-    public void ChangeAnimation(string animationName)
+    public class GUIHelper : MonoBehaviour
     {
-        SpriteSheetAnimator.Play(DynamicAnimationsDemo.character, animationName);
+        public void ChangeAnimation(string animationName)
+        {
+            SpriteSheetAnimator.Play(DynamicAnimationsDemo.character, animationName);
+        }
     }
+
 }

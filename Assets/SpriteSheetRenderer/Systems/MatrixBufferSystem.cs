@@ -6,26 +6,29 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
-public class MatrixBufferSystem : SystemBase
+namespace ECSSpriteSheetAnimation
 {
-    protected override void OnUpdate()
+    public class MatrixBufferSystem : SystemBase
     {
-        var buffers = DynamicBufferManager.GetMatrixBuffers();
-
-        for (int bufferID = 0; bufferID < buffers.Length; bufferID++)
+        protected override void OnUpdate()
         {
-            DynamicBuffer<MatrixBuffer> buffer = buffers[bufferID];
-            Dependency = Entities
-                .WithBurst()
-                .WithNativeDisableContainerSafetyRestriction(buffer)
-                .ForEach((in SpriteMatrix spriteMatrix, in BufferHook bufferHook) =>
-                {
-                    if (bufferID == bufferHook.bufferEntityID)
+            var buffers = DynamicBufferManager.GetMatrixBuffers();
+
+            for (int bufferID = 0; bufferID < buffers.Length; bufferID++)
+            {
+                DynamicBuffer<MatrixBuffer> buffer = buffers[bufferID];
+                Dependency = Entities
+                    .WithBurst()
+                    .WithNativeDisableContainerSafetyRestriction(buffer)
+                    .ForEach((in SpriteMatrix spriteMatrix, in BufferHook bufferHook) =>
                     {
-                        buffer[bufferHook.bufferID] = spriteMatrix.matrix;
-                    }
-                })
-                .ScheduleParallel(Dependency);
+                        if (bufferID == bufferHook.bufferEntityID)
+                        {
+                            buffer[bufferHook.bufferID] = spriteMatrix.matrix;
+                        }
+                    })
+                    .ScheduleParallel(Dependency);
+            }
         }
-    }
+    } 
 }

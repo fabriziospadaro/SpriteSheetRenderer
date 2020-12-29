@@ -1,6 +1,9 @@
 ﻿using Unity.Entities;
 
-public struct LifeTime : IComponentData
+namespace ECSSpriteSheetAnimation.Examples
 {
-    public float Value;
+    public struct LifeTime : IComponentData
+    {
+        public float Value;
+    }
 }

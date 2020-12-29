@@ -4,17 +4,20 @@ using Unity.Burst;
 using Unity.Jobs;
 using Unity.Collections;
 
-public class Bound2DSystem : SystemBase
+namespace ECSSpriteSheetAnimation
 {
-    protected override void OnUpdate()
+    public class Bound2DSystem : SystemBase
     {
-        Dependency = Entities
-            .WithBurst()
-            .ForEach((ref Bound2D bound, in Position2D translation, in Scale scale) =>
-            {
-                bound.scale = scale.Value;
-                bound.position = translation.Value;
-            })
-            .ScheduleParallel(Dependency);
-    }
+        protected override void OnUpdate()
+        {
+            Dependency = Entities
+                .WithBurst()
+                .ForEach((ref Bound2D bound, in Position2D translation, in Scale scale) =>
+                {
+                    bound.scale = scale.Value;
+                    bound.position = translation.Value;
+                })
+                .ScheduleParallel(Dependency);
+        }
+    } 
 }

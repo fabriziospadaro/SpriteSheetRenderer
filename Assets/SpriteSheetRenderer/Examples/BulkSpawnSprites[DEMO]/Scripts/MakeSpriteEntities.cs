@@ -10,15 +10,19 @@ namespace ECSSpriteSheetAnimation.Examples
 {
     public class MakeSpriteEntities : MonoBehaviour, IConvertGameObjectToEntity
     {
+        [SerializeField]
+        private string spriteSheetName = "emoji";
+
         public int spriteCount = 5000;
         public Sprite[] sprites;
         public float2 spawnArea = new float2(100, 100);
 
         Rect GetSpawnArea()
         {
-            Rect r = new Rect(0, 0, spawnArea.x, spawnArea.y);
-            r.center = transform.position;
-            return r;
+            return new Rect(0, 0, spawnArea.x, spawnArea.y)
+            {
+                center = transform.position
+            };
         }
 
         public void Convert(Entity entity, EntityManager eManager, GameObjectConversionSystem conversionSystem)
@@ -40,13 +44,13 @@ namespace ECSSpriteSheetAnimation.Examples
             eManager.CreateEntity(archetype, entities);
 
             //only needed for the first time to bake the material and create the uv map
-            SpriteSheetManager.RecordSpriteSheet(sprites, "emoji", entities.Length);
+            SpriteSheetManager.RecordSpriteSheet(sprites, spriteSheetName, entities.Length);
 
 
             Rect area = GetSpawnArea();
             Random rand = new Random((uint)UnityEngine.Random.Range(0, int.MaxValue));
-            int cellCount = SpriteSheetCache.GetLength("emoji");
-            SpriteSheetMaterial material = new SpriteSheetMaterial { material = SpriteSheetCache.GetMaterial("emoji") };
+            int cellCount = SpriteSheetCache.GetLength(spriteSheetName);
+            SpriteSheetMaterial material = new SpriteSheetMaterial { material = SpriteSheetCache.GetMaterial(spriteSheetName) };
 
             for (int i = 0; i < entities.Length; i++)
             {

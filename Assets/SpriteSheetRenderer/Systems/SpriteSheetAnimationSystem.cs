@@ -3,44 +3,47 @@ using Unity.Burst;
 using Unity.Jobs;
 using UnityEngine;
 
-public class SpriteSheetAnimationSystem : SystemBase
+namespace ECSSpriteSheetAnimation
 {
-    protected override void OnUpdate()
+    public class SpriteSheetAnimationSystem : SystemBase
     {
-        Dependency = Entities
-            .WithBurst()
-            .ForEach((ref SpriteSheetAnimation animation, ref SpriteIndex spriteIndex) =>
-            {
-                if (animation.play && animation.elapsedFrames % animation.samples == 0 && animation.elapsedFrames != 0)
+        protected override void OnUpdate()
+        {
+            Dependency = Entities
+                .WithBurst()
+                .ForEach((ref SpriteSheetAnimation animation, ref SpriteIndex spriteIndex) =>
                 {
-                    switch (animation.repetition)
+                    if (animation.play && animation.elapsedFrames % animation.samples == 0 && animation.elapsedFrames != 0)
                     {
-                        case SpriteSheetAnimation.RepetitionType.Once:
-                            if (spriteIndex.Value + 1 < animation.maxSprites)
-                            {
-                                spriteIndex.Value += 1;
-                            }
-                            else
-                            {
-                                animation.play = false;
-                            }
-                            break;
-                        case SpriteSheetAnimation.RepetitionType.Loop:
-                            spriteIndex.Value = spriteIndex.Value + 1 >= animation.maxSprites ? 0 : spriteIndex.Value + 1;
-                            break;
+                        switch (animation.repetition)
+                        {
+                            case SpriteSheetAnimation.RepetitionType.Once:
+                                if (spriteIndex.Value + 1 < animation.maxSprites)
+                                {
+                                    spriteIndex.Value += 1;
+                                }
+                                else
+                                {
+                                    animation.play = false;
+                                }
+                                break;
+                            case SpriteSheetAnimation.RepetitionType.Loop:
+                                spriteIndex.Value = spriteIndex.Value + 1 >= animation.maxSprites ? 0 : spriteIndex.Value + 1;
+                                break;
+                        }
+                        animation.elapsedFrames = 0;
                     }
-                    animation.elapsedFrames = 0;
-                }
-                else if (animation.play)
-                {
-                    animation.elapsedFrames += 1;
-                }
-            })
-            .ScheduleParallel(Dependency);
-    }
+                    else if (animation.play)
+                    {
+                        animation.elapsedFrames += 1;
+                    }
+                })
+                .ScheduleParallel(Dependency);
+        }
 
-    public static bool NextWillReachEnd(SpriteSheetAnimation animation, SpriteIndex spriteIndex)
-    {
-        return spriteIndex.Value + 1 >= animation.maxSprites;
-    }
+        public static bool NextWillReachEnd(SpriteSheetAnimation animation, SpriteIndex spriteIndex)
+        {
+            return spriteIndex.Value + 1 >= animation.maxSprites;
+        }
+    } 
 }

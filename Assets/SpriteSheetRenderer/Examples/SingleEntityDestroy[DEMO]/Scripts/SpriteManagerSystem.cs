@@ -6,20 +6,23 @@ using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
 
-public class SpriteManagerSystem : ComponentSystem
+namespace ECSSpriteSheetAnimation.Examples
 {
-    protected override void OnUpdate()
+    public class SpriteManagerSystem : ComponentSystem
     {
-        Entities.WithAll<LifeTime>().ForEach((Entity entity, ref LifeTime lifetime) =>
+        protected override void OnUpdate()
         {
-            if (lifetime.Value < 0)
+            Entities.WithAll<LifeTime>().ForEach((Entity entity, ref LifeTime lifetime) =>
             {
-                SpriteSheetManager.DestroyEntity(entity, "emoji");
-            }
-            else
-            {
-                lifetime.Value -= Time.DeltaTime;
-            }
-        });
-    }
+                if (lifetime.Value < 0)
+                {
+                    SpriteSheetManager.DestroyEntity(entity, "emoji");
+                }
+                else
+                {
+                    lifetime.Value -= Time.DeltaTime;
+                }
+            });
+        }
+    } 
 }

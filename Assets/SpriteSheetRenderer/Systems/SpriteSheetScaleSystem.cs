@@ -4,17 +4,20 @@ using Unity.Jobs;
 using Unity.Collections;
 using Unity.Transforms;
 
-public class SpriteSheetScaleSystem : SystemBase
+namespace ECSSpriteSheetAnimation
 {
-    protected override void OnUpdate()
+    public class SpriteSheetScaleSystem : SystemBase
     {
-        Dependency = Entities
-            .WithBurst()
-            .WithChangeFilter<Scale>()
-            .ForEach((ref SpriteMatrix renderData, in Scale scale) =>
-            {
-                renderData.matrix.w = scale.Value;
-            })
-            .ScheduleParallel(Dependency);
-    }
+        protected override void OnUpdate()
+        {
+            Dependency = Entities
+                .WithBurst()
+                .WithChangeFilter<Scale>()
+                .ForEach((ref SpriteMatrix renderData, in Scale scale) =>
+                {
+                    renderData.matrix.w = scale.Value;
+                })
+                .ScheduleParallel(Dependency);
+        }
+    } 
 }

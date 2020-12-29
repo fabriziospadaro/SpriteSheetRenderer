@@ -5,39 +5,44 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
-public class SingleEntityDestroy : MonoBehaviour, IConvertGameObjectToEntity
+namespace ECSSpriteSheetAnimation.Examples
 {
-    public Sprite[] sprites;
-    EntityArchetype archetype;
-
-    public void Convert(Entity entity, EntityManager eManager, GameObjectConversionSystem conversionSystem)
+    public class SingleEntityDestroy : MonoBehaviour, IConvertGameObjectToEntity
     {
-        //Record and bake this spritesheets(only once)
-        archetype = eManager.CreateArchetype(
-            typeof(Position2D),
-            typeof(Rotation2D),
-            typeof(Scale),
-            typeof(LifeTime),
-            //required params
-            typeof(SpriteIndex),
-            typeof(SpriteSheetAnimation),
-            typeof(SpriteSheetMaterial),
-            typeof(SpriteSheetColor),
-            typeof(SpriteMatrix),
-            typeof(BufferHook)
-        );
-        SpriteSheetManager.RecordSpriteSheet(sprites, "emoji");
-    }
+        [SerializeField]
+        private string spriteSheetName = "emoji";
 
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
+        public Sprite[] sprites;
+        private EntityArchetype archetype;
+
+        public void Convert(Entity entity, EntityManager eManager, GameObjectConversionSystem conversionSystem)
         {
-            int maxSprites = SpriteSheetCache.GetLength("emoji");
-            var color = UnityEngine.Random.ColorHSV(.35f, .85f);
+            //Record and bake this spritesheets(only once)
+            archetype = eManager.CreateArchetype(
+                typeof(Position2D),
+                typeof(Rotation2D),
+                typeof(Scale),
+                typeof(LifeTime),
+                //required params
+                typeof(SpriteIndex),
+                typeof(SpriteSheetAnimation),
+                typeof(SpriteSheetMaterial),
+                typeof(SpriteSheetColor),
+                typeof(SpriteMatrix),
+                typeof(BufferHook)
+            );
+            SpriteSheetManager.RecordSpriteSheet(sprites, spriteSheetName);
+        }
 
-            // 3) Populate components
-            List<IComponentData> components = new List<IComponentData> {
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                int maxSprites = SpriteSheetCache.GetLength(spriteSheetName);
+                var color = UnityEngine.Random.ColorHSV(.35f, .85f);
+
+                // 3) Populate components
+                List<IComponentData> components = new List<IComponentData> {
                 new Position2D { Value = UnityEngine.Random.insideUnitCircle * 7 },
                 new Scale { Value = UnityEngine.Random.Range(0,3f) },
                 new SpriteIndex { Value = UnityEngine.Random.Range(0, maxSprites) },
@@ -46,7 +51,8 @@ public class SingleEntityDestroy : MonoBehaviour, IConvertGameObjectToEntity
                 new LifeTime{ Value = UnityEngine.Random.Range(5,15)}
             };
 
-            SpriteSheetManager.Instantiate(archetype, components, "emoji");
+                SpriteSheetManager.Instantiate(archetype, components, spriteSheetName);
+            }
         }
-    }
+    } 
 }

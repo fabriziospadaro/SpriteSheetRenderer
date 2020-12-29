@@ -3,16 +3,19 @@ using Unity.Burst;
 using Unity.Jobs;
 using Unity.Collections;
 
-public class SpriteSheetRotationSystem : SystemBase
+namespace ECSSpriteSheetAnimation
 {
-    protected override void OnUpdate()
+    public class SpriteSheetRotationSystem : SystemBase
     {
-        Dependency = Entities
-            .WithBurst()
-            .ForEach((ref SpriteMatrix renderData, in Rotation2D rotation) =>
-            {
-                renderData.matrix.z = rotation.angle;
-            })
-            .ScheduleParallel(Dependency);
-    }
+        protected override void OnUpdate()
+        {
+            Dependency = Entities
+                .WithBurst()
+                .ForEach((ref SpriteMatrix renderData, in Rotation2D rotation) =>
+                {
+                    renderData.matrix.z = rotation.angle;
+                })
+                .ScheduleParallel(Dependency);
+        }
+    } 
 }
