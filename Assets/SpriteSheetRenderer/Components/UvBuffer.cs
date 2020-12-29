@@ -9,8 +9,9 @@ using UnityEngine;
 // will be reserved (32 bytes) along with the size of the buffer header
 // (currently 16 bytes on 64-bit targets)
 [InternalBufferCapacity(8)]
-public struct UvBuffer : IBufferElementData {
-  public static implicit operator float4(UvBuffer e) { return e.uv; }
-  public static implicit operator UvBuffer(float4 e) { return new UvBuffer { uv = e }; }
-  public float4 uv;
+public struct UvBuffer : IBufferElementData
+{
+    public static implicit operator float4(UvBuffer e) { return e.uv; }
+    public static implicit operator UvBuffer(float4 e) { return new UvBuffer { uv = e }; }
+    public float4 uv;
 }
