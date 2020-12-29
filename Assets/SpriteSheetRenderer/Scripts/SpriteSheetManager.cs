@@ -12,7 +12,7 @@ public abstract class SpriteSheetManager
     {
         get
         {
-            if (entityManager == null)
+            if (entityManager == default)
                 entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             return entityManager;
         }
