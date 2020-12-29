@@ -6,65 +6,26 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
-public class ColorBufferSystem : JobComponentSystem
+public class ColorBufferSystem : SystemBase
 {
-    [BurstCompile]
-    private struct UpdateJobChunk : IJobChunk
-    {
-        [NativeDisableParallelForRestriction]
-        public DynamicBuffer<SpriteColorBuffer> indexBuffer;
-        [ReadOnly]
-        public int bufferEntityID;
-
-        [ReadOnly]
-        public ComponentTypeHandle<SpriteSheetColor> data;
-        [ReadOnly]
-        public ComponentTypeHandle<BufferHook> hook;
-
-        public void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex)
-        {
-            var chunkSpriteMatrix = chunk.GetNativeArray(data);
-            var chunkBufferHooks = chunk.GetNativeArray(hook);
-
-            for (int i = 0; i < chunk.Count; i++)
-            {
-                if (bufferEntityID == chunkBufferHooks[i].bufferEntityID)
-                {
-                    indexBuffer[chunkBufferHooks[i].bufferID] = chunkSpriteMatrix[i].color;
-                }
-            }
-        }
-    }
-
-    private EntityQuery m_EntityQuery;
-
-    protected override void OnCreate()
-    {
-        base.OnCreate();
-
-        m_EntityQuery = GetEntityQuery(
-            ComponentType.ReadOnly<SpriteSheetColor>(),
-            ComponentType.ReadOnly<BufferHook>());
-        m_EntityQuery.SetChangedVersionFilter(ComponentType.ReadOnly<SpriteSheetColor>());
-    }
-
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    protected override void OnUpdate()
     {
         var buffers = DynamicBufferManager.GetColorBuffers();
-        NativeArray<JobHandle> jobs = new NativeArray<JobHandle>(buffers.Length, Allocator.Temp);
-        for (int i = 0; i < buffers.Length; i++)
+
+        for (int bufferID = 0; bufferID < buffers.Length; bufferID++)
         {
-            inputDeps = new UpdateJobChunk()
-            {
-                indexBuffer = buffers[i],
-                bufferEntityID = i,
-                data = GetComponentTypeHandle<SpriteSheetColor>(isReadOnly: true),
-                hook = GetComponentTypeHandle<BufferHook>(isReadOnly: true)
-            }.Schedule(m_EntityQuery, inputDeps);
-            jobs[i] = inputDeps;
+            DynamicBuffer<SpriteColorBuffer> buffer = buffers[bufferID];
+            Dependency = Entities
+                .WithBurst()
+                .WithNativeDisableContainerSafetyRestriction(buffer)
+                .ForEach((in SpriteSheetColor spriteSheetColor, in BufferHook bufferHook) =>
+                {
+                    if (bufferID == bufferHook.bufferEntityID)
+                    {
+                        buffer[bufferHook.bufferID] = spriteSheetColor.color;
+                    }
+                })
+                .ScheduleParallel(Dependency);
         }
-        JobHandle.CompleteAll(jobs);
-        jobs.Dispose();
-        return inputDeps;
     }
 }
