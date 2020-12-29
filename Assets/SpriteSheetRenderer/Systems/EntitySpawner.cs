@@ -3,6 +3,7 @@ using Unity.Mathematics;
 using UnityEngine.UI;
 using Unity.Entities;
 using System.Linq;
+
 public class EntitySpawner : MonoBehaviour
 {
     QuadTree qt = null;
@@ -31,6 +32,7 @@ public class EntitySpawner : MonoBehaviour
         }
         spriteCount.text = "Entity Count: " + (World.DefaultGameObjectInjectionWorld.EntityManager.Debug.EntityCount - 2).ToString();
     }
+
     public void Subdivide()
     {
         qt.Insert(float2.zero, true);
