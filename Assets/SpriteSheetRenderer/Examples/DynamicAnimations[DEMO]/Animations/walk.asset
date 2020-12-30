@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d000e9c4364d3764c89516aaf73c46ea, type: 3}
+  m_Script: {fileID: 11500000, guid: adec6d725e27aeb4aa3390394e8392a2, type: 3}
   m_Name: walk
   m_EditorClassIdentifier: 
   animationName: walk
@@ -18,7 +18,5 @@ MonoBehaviour:
   - {fileID: -517894308114096243, guid: 57f6b6fe96601a14694379954154ba7c, type: 3}
   - {fileID: 7755224123621818408, guid: 57f6b6fe96601a14694379954154ba7c, type: 3}
   - {fileID: -3557554893070573299, guid: 57f6b6fe96601a14694379954154ba7c, type: 3}
-  startIndex: 0
-  playOnStart: 1
-  samples: 32
-  repetition: 1
+  framesPerSecond: 6
+  playMode: 1
