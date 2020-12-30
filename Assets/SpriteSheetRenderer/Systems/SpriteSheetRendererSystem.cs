@@ -5,13 +5,13 @@ using Unity.Mathematics;
 namespace ECSSpriteSheetAnimation
 {
     [UpdateInGroup(typeof(PresentationSystemGroup))]
-    public class SpriteSheetRenderer : ComponentSystem
+    public class SpriteSheetRendererSystem : SystemBase
     {
         private Mesh mesh;
 
         protected override void OnCreate()
         {
-            mesh = MeshExtension.Quad();
+            mesh = MeshUtility.CreateQuad();
         }
 
         protected override void OnDestroy()
@@ -24,7 +24,13 @@ namespace ECSSpriteSheetAnimation
             for (int i = 0; i < SpriteSheetManager.renderInformation.Count; i++)
             {
                 if (UpdateBuffers(i) > 0)
-                    Graphics.DrawMeshInstancedIndirect(mesh, 0, SpriteSheetManager.renderInformation[i].material, new Bounds(Vector3.zero, Vector3.one), SpriteSheetManager.renderInformation[i].argsBuffer);
+                {
+                    Graphics.DrawMeshInstancedIndirect(mesh,
+                                                       0,
+                                                       SpriteSheetManager.renderInformation[i].material,
+                                                       new Bounds(Vector3.zero, Vector3.one),
+                                                       SpriteSheetManager.renderInformation[i].argsBuffer);
+                }
 
                 //this is w.i.p to clean the old buffers
                 DynamicBuffer<SpriteIndexBuffer> indexBuffer = EntityManager.GetBuffer<SpriteIndexBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity);
@@ -38,15 +44,17 @@ namespace ECSSpriteSheetAnimation
                 int toRemove = indexBuffer.Length - start;
                 if (toRemove > 0)
                 {
-                    EntityManager.GetBuffer<SpriteIndexBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(start, toRemove);
-                    EntityManager.GetBuffer<MatrixBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(start, toRemove);
-                    EntityManager.GetBuffer<SpriteColorBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRange(start, toRemove);
+                    EntityManager.GetBuffer<SpriteIndexBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRangeSwapBack(start, toRemove);
+                    EntityManager.GetBuffer<MatrixBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRangeSwapBack(start, toRemove);
+                    EntityManager.GetBuffer<SpriteColorBuffer>(SpriteSheetManager.renderInformation[i].bufferEntity).RemoveRangeSwapBack(start, toRemove);
                 }
             }
         }
 
-        //we should only update the index of the changed datas for index buffer,matrixbuffer and color buffer inside a burst job to avoid overhead
-        int UpdateBuffers(int renderIndex)
+        // we should only update the index of the changed datas for 
+        // indexBuffer, matrixBuffer, and colorBuffer inside a bursted
+        // job to avoid overhead
+        private int UpdateBuffers(int renderIndex)
         {
             SpriteSheetManager.ReleaseBuffer(renderIndex);
 
@@ -54,9 +62,9 @@ namespace ECSSpriteSheetAnimation
             int instanceCount = EntityManager.GetBuffer<SpriteIndexBuffer>(renderInformation.bufferEntity).Length;
             if (instanceCount > 0)
             {
-                int stride = instanceCount >= 16 ? 16 : 16 * SpriteSheetCache.GetLength(renderInformation.material);
                 if (renderInformation.updateUvs)
                 {
+                    int stride = instanceCount >= 16 ? 16 : 16 * SpriteSheetCache.GetLength(renderInformation.material);
                     SpriteSheetManager.ReleaseUvBuffer(renderIndex);
                     renderInformation.uvBuffer = new ComputeBuffer(instanceCount, stride);
                     renderInformation.uvBuffer.SetData(EntityManager.GetBuffer<UvBuffer>(renderInformation.bufferEntity).Reinterpret<float4>().AsNativeArray());
@@ -81,5 +89,5 @@ namespace ECSSpriteSheetAnimation
             }
             return instanceCount;
         }
-    } 
+    }
 }
