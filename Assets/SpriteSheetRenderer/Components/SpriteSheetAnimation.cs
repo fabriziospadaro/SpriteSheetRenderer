@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 
-public struct SpriteSheetAnimation : IComponentData
+namespace ECSSpriteSheetAnimation
 {
     public enum RepetitionType { Once, Loop, PingPong }
     public RepetitionType repetition;
@@ -9,4 +9,6 @@ public struct SpriteSheetAnimation : IComponentData
     public int samples;
     public bool play;
     public int maxSprites;
+    public struct SpriteSheetAnimation : IComponentData
+    {
 }
