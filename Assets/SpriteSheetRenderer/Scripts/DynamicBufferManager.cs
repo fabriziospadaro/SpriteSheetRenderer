@@ -9,15 +9,9 @@ using System.Linq;
 //todo entity is a dictionary with spritesheetmaterial and is used to separate buffers from different material
 
 public static class DynamicBufferManager {
-  private static EntityManager entityManager;
 
-  public static EntityManager EntityManager {
-    get {
-      if(entityManager == null)
-        entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-      return entityManager;
-    }
-  }
+  public static EntityManager EntityManager {get { return SpriteSheetManager.EntityManager;}}
+  
   //list of all the "Enities with all the buffers"
   //Each different material have a different bufferEnity
   private static List<Entity> bufferEntities = new List<Entity>();
@@ -133,10 +127,10 @@ public static class DynamicBufferManager {
       buffers[i] = EntityManager.GetBuffer<SpriteIndexBuffer>(bufferEntities[i]);
     return buffers;
   }
-  public static DynamicBuffer<MatrixBuffer>[] GetMatrixBuffers() {
+  public static DynamicBuffer<MatrixBuffer>[] GetMatrixBuffers(EntityManager jobEmanager) {
     DynamicBuffer<MatrixBuffer>[] buffers = new DynamicBuffer<MatrixBuffer>[bufferEntities.Count];
     for(int i = 0; i < buffers.Length; i++)
-      buffers[i] = EntityManager.GetBuffer<MatrixBuffer>(bufferEntities[i]);
+      buffers[i] = jobEmanager.GetBuffer<MatrixBuffer>(bufferEntities[i]);
     return buffers;
   }
   public static DynamicBuffer<SpriteColorBuffer>[] GetColorBuffers() {
