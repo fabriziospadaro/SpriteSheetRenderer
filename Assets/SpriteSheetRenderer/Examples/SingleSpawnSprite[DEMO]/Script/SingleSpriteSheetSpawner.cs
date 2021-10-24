@@ -8,6 +8,8 @@ using UnityEngine;
 public class SingleSpriteSheetSpawner : MonoBehaviour, IConvertGameObjectToEntity {
   public Sprite[] sprites;
   public void Convert(Entity entity, EntityManager eManager, GameObjectConversionSystem conversionSystem) {
+
+    SpriteSheetManager.SetEntityManager(eManager);
     // 1) Create Archetype
     EntityArchetype archetype = eManager.CreateArchetype(
              typeof(Position2D),

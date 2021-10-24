@@ -17,6 +17,8 @@ namespace ECSSpriteSheetAnimation.Examples {
     }
 
     public void Convert(Entity entity, EntityManager eManager, GameObjectConversionSystem conversionSystem) {
+      SpriteSheetManager.SetEntityManager(eManager);
+
       EntityArchetype archetype = eManager.CreateArchetype(
          typeof(Position2D),
          typeof(Rotation2D),

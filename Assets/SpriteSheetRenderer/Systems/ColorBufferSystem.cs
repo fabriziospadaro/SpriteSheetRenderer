@@ -1,36 +1,40 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Unity.Burst;
-using Unity.Collections;
+﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
-using UnityEngine;
 
-public class ColorBufferSystem : JobComponentSystem {
-  [BurstCompile]
-  struct UpdateJob : IJobForEach<SpriteSheetColor, BufferHook> {
-    [NativeDisableParallelForRestriction]
-    public DynamicBuffer<SpriteColorBuffer> indexBuffer;
-    [ReadOnly]
-    public int bufferEnityID;
-    public void Execute([ReadOnly, ChangedFilter] ref SpriteSheetColor data, [ReadOnly] ref BufferHook hook) {
-      if(bufferEnityID == hook.bufferEnityID)
-        indexBuffer[hook.bufferID] = data.color;
+public class ColorBufferSystem : SystemBase {
+  EntityQuery query;
+  protected override void OnCreate(){
+    query = GetEntityQuery(ComponentType.ReadOnly<SpriteSheetColor>(), ComponentType.ReadOnly<BufferHook>());
+    query.SetChangedVersionFilter(typeof(SpriteSheetColor));
+    query.AddDependency(Dependency);
+  }
+  protected override void OnUpdate(){
+    NativeArray<SpriteSheetColor> spriteSheetColors = query.ToComponentDataArrayAsync<SpriteSheetColor>(Allocator.TempJob, out JobHandle colorsHandle);
+    
+    if(spriteSheetColors.Length > 0) {
+      NativeArray<BufferHook> bufferHooks = query.ToComponentDataArrayAsync<BufferHook>(Allocator.TempJob, out JobHandle hooksHandle);
+      Dependency = JobHandle.CombineDependencies(Dependency, colorsHandle, hooksHandle);
+
+      var jDep = Entities.WithName("ColorBufferSystem").ForEach(
+        (ref DynamicBuffer<SpriteColorBuffer> spriteColorBuffers) => {
+          for(int i = 0; i < bufferHooks.Length; i++)
+            spriteColorBuffers[bufferHooks[i].bufferID] = spriteSheetColors[i].color;
+        }
+      )
+      .WithDisposeOnCompletion(bufferHooks)
+      .WithDisposeOnCompletion(spriteSheetColors)
+      .WithNativeDisableParallelForRestriction(spriteSheetColors)
+      .WithNativeDisableParallelForRestriction(bufferHooks)
+      .ScheduleParallel(Dependency);
+      Dependency = JobHandle.CombineDependencies(Dependency, jDep);
     }
   }
 
-  protected override JobHandle OnUpdate(JobHandle inputDeps) {
-    var buffers = DynamicBufferManager.GetColorBuffers();
-    NativeArray<JobHandle> jobs = new NativeArray<JobHandle>(buffers.Length, Allocator.TempJob);
-    for(int i = 0; i < buffers.Length; i++) {
-      inputDeps = new UpdateJob() {
-        indexBuffer = buffers[i],
-        bufferEnityID = i
-      }.Schedule(this, inputDeps);
-      jobs[i] = inputDeps;
-    }
-    JobHandle.CompleteAll(jobs);
-    jobs.Dispose();
-    return inputDeps;
+  protected override void OnStopRunning(){
+    base.OnStopRunning();
+    query.CompleteDependency();
+    Dependency.Complete();
   }
+
 }

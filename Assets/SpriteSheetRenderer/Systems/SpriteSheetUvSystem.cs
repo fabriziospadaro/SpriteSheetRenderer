@@ -1,36 +1,40 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Unity.Burst;
-using Unity.Collections;
+﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
-using UnityEngine;
 
-public class SpriteSheetUvJobSystem : JobComponentSystem {
-  [BurstCompile]
-  struct UpdateJob : IJobForEach<SpriteIndex, BufferHook> {
-    [NativeDisableParallelForRestriction]
-    public DynamicBuffer<SpriteIndexBuffer> indexBuffer;
-    [ReadOnly]
-    public int bufferEnityID;
-    public void Execute([ReadOnly, ChangedFilter] ref SpriteIndex data, [ReadOnly] ref BufferHook hook) {
-      if(bufferEnityID == hook.bufferEnityID)
-        indexBuffer[hook.bufferID] = data.Value;
+public class SpriteSheetUvJobSystem : SystemBase {
+  EntityQuery query;
+  protected override void OnCreate(){
+    query = GetEntityQuery(ComponentType.ReadOnly<SpriteIndex>(), ComponentType.ReadOnly<BufferHook>());
+    query.SetChangedVersionFilter(typeof(SpriteIndex));
+    query.AddDependency(Dependency);
+  }
+  protected override void OnUpdate(){
+    NativeArray<SpriteIndex> spriteIndices = query.ToComponentDataArrayAsync<SpriteIndex>(Allocator.TempJob, out JobHandle indicesHandle);
+
+    if(spriteIndices.Length > 0) {
+      NativeArray<BufferHook> bufferHooks = query.ToComponentDataArrayAsync<BufferHook>(Allocator.TempJob, out JobHandle hooksHandle);
+      Dependency = JobHandle.CombineDependencies(Dependency, indicesHandle,hooksHandle);
+
+      var jDep = Entities.WithName("SpriteSheetUvJobSystem").ForEach(
+        (ref DynamicBuffer<SpriteIndexBuffer> spriteIndexBuffers) => {
+          for(int i = 0; i < bufferHooks.Length; i++)
+            spriteIndexBuffers[bufferHooks[i].bufferID] = spriteIndices[i].Value;
+        }
+      )
+      .WithDisposeOnCompletion(bufferHooks)
+      .WithDisposeOnCompletion(spriteIndices)
+      .WithNativeDisableParallelForRestriction(spriteIndices)
+      .WithNativeDisableContainerSafetyRestriction(bufferHooks)
+      .ScheduleParallel(Dependency);
+      Dependency = JobHandle.CombineDependencies(Dependency, jDep);
     }
   }
 
-  protected override JobHandle OnUpdate(JobHandle inputDeps) {
-    var buffers = DynamicBufferManager.GetIndexBuffers();
-    NativeArray<JobHandle> jobs = new NativeArray<JobHandle>(buffers.Length, Allocator.TempJob);
-    for(int i = 0; i < buffers.Length; i++) {
-      inputDeps = new UpdateJob() {
-        indexBuffer = buffers[i],
-        bufferEnityID = i
-      }.Schedule(this, inputDeps);
-      jobs[i] = inputDeps;
-    }
-    JobHandle.CompleteAll(jobs);
-    jobs.Dispose();
-    return inputDeps;
+  protected override void OnStopRunning(){
+    base.OnStopRunning();
+    query.CompleteDependency();
+    Dependency.Complete();
   }
+
 }

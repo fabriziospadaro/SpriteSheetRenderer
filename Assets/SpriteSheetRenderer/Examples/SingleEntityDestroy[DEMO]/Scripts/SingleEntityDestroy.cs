@@ -11,6 +11,8 @@ public class SingleEntityDestroy : MonoBehaviour, IConvertGameObjectToEntity {
 
   public void Convert(Entity entity, EntityManager eManager, GameObjectConversionSystem conversionSystem) {
     //Record and bake this spritesheets(only once)
+    SpriteSheetManager.SetEntityManager(eManager);
+
     archetype = eManager.CreateArchetype(
             typeof(Position2D),
             typeof(Rotation2D),

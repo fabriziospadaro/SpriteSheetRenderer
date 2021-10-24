@@ -10,9 +10,13 @@ public abstract class SpriteSheetManager {
   public static EntityManager EntityManager {
     get {
       if(entityManager == null)
-        entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        Debug.LogError("EntityManager not set");
       return entityManager;
     }
+  }
+
+  public static void SetEntityManager(EntityManager e) {
+    entityManager = e;
   }
 
   public static Entity Instantiate(EntityArchetype archetype, List<IComponentData> componentDatas, string spriteSheetName) {

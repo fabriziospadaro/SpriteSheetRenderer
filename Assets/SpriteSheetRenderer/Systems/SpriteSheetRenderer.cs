@@ -11,7 +11,6 @@ public class SpriteSheetRenderer : ComponentSystem {
     SpriteSheetManager.CleanBuffers();
   }
   protected override void OnUpdate() {
-
     for(int i = 0; i < SpriteSheetManager.renderInformation.Count; i++) {
       if(UpdateBuffers(i) > 0)
         Graphics.DrawMeshInstancedIndirect(mesh, 0, SpriteSheetManager.renderInformation[i].material, new Bounds(Vector2.zero, Vector3.one), SpriteSheetManager.renderInformation[i].argsBuffer);
@@ -35,7 +34,8 @@ public class SpriteSheetRenderer : ComponentSystem {
       }
     }
   }
-      //we should only update the index of the changed datas for index buffer,matrixbuffer and color buffer inside a burst job to avoid overhead
+  
+  //we should only update the index of the changed datas for index buffer,matrixbuffer and color buffer inside a burst job to avoid overhead
   int UpdateBuffers(int renderIndex) {
     SpriteSheetManager.ReleaseBuffer(renderIndex);
 
@@ -43,6 +43,7 @@ public class SpriteSheetRenderer : ComponentSystem {
     int instanceCount = EntityManager.GetBuffer<SpriteIndexBuffer>(renderInformation.bufferEntity).Length;
     if(instanceCount > 0) {
       int stride = instanceCount >= 16 ? 16 : 16 * SpriteSheetCache.GetLenght(renderInformation.material);
+      
       if(renderInformation.updateUvs) {
         SpriteSheetManager.ReleaseUvBuffer(renderIndex);
         renderInformation.uvBuffer = new ComputeBuffer(instanceCount, stride);
