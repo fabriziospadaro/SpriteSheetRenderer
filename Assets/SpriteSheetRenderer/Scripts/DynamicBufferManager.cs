@@ -46,11 +46,14 @@ public static class DynamicBufferManager {
       typeof(MatrixBuffer),
       typeof(SpriteColorBuffer),
       typeof(SpriteSheetMaterial),
-      typeof(UvBuffer)
+      typeof(UvBuffer),
+      typeof(EntityIDComponent)
     );
     Entity e = EntityManager.CreateEntity(archetype);
     bufferEntities.Add(e);
     EntityManager.SetSharedComponentData(e, material);
+    EntityManager.SetComponentData(e, new EntityIDComponent { id = materialEntityBufferID.Count });
+    EntityManager.SetName(e, $"EntityBuffer[{materialEntityBufferID.Count}]");
     materialEntityBufferID.Add(material.material, materialEntityBufferID.Count);
   }
 

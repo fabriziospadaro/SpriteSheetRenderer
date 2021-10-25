@@ -2,39 +2,35 @@
 using Unity.Entities;
 using Unity.Jobs;
 
-public class SpriteSheetUvJobSystem : SystemBase {
+public class UVBufferSystem : SystemBase {
   EntityQuery query;
+
   protected override void OnCreate(){
     query = GetEntityQuery(ComponentType.ReadOnly<SpriteIndex>(), ComponentType.ReadOnly<BufferHook>());
     query.SetChangedVersionFilter(typeof(SpriteIndex));
-    query.AddDependency(Dependency);
   }
+
   protected override void OnUpdate(){
     NativeArray<SpriteIndex> spriteIndices = query.ToComponentDataArrayAsync<SpriteIndex>(Allocator.TempJob, out JobHandle indicesHandle);
+    Dependency = JobHandle.CombineDependencies(Dependency, indicesHandle);
 
     if(spriteIndices.Length > 0) {
       NativeArray<BufferHook> bufferHooks = query.ToComponentDataArrayAsync<BufferHook>(Allocator.TempJob, out JobHandle hooksHandle);
-      Dependency = JobHandle.CombineDependencies(Dependency, indicesHandle,hooksHandle);
+      Dependency = JobHandle.CombineDependencies(Dependency, hooksHandle);
 
-      var jDep = Entities.WithName("SpriteSheetUvJobSystem").ForEach(
-        (ref DynamicBuffer<SpriteIndexBuffer> spriteIndexBuffers) => {
+      Dependency = JobHandle.CombineDependencies(Dependency,Entities.WithName("UVBufferSystem").WithReadOnly(spriteIndices).WithReadOnly(bufferHooks).ForEach(
+        (ref DynamicBuffer<SpriteIndexBuffer> spriteIndexBuffers, in EntityIDComponent entityID) => {
           for(int i = 0; i < bufferHooks.Length; i++)
-            spriteIndexBuffers[bufferHooks[i].bufferID] = spriteIndices[i].Value;
+            if(bufferHooks[i].bufferEnityID == entityID.id)
+              spriteIndexBuffers[bufferHooks[i].bufferID] = spriteIndices[i].Value;
         }
       )
       .WithDisposeOnCompletion(bufferHooks)
       .WithDisposeOnCompletion(spriteIndices)
-      .WithNativeDisableParallelForRestriction(spriteIndices)
-      .WithNativeDisableContainerSafetyRestriction(bufferHooks)
-      .ScheduleParallel(Dependency);
-      Dependency = JobHandle.CombineDependencies(Dependency, jDep);
+      .ScheduleParallel(Dependency));
     }
-  }
-
-  protected override void OnStopRunning(){
-    base.OnStopRunning();
-    query.CompleteDependency();
-    Dependency.Complete();
+    else
+      spriteIndices.Dispose();
   }
 
 }

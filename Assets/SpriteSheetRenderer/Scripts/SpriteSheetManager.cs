@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -29,8 +31,7 @@ public abstract class SpriteSheetManager {
     return e;
   }
 
-  public static Entity Instantiate(EntityArchetype archetype, List<IComponentData> componentDatas, SpriteSheetAnimator animator)
-  {
+  public static Entity Instantiate(EntityArchetype archetype, List<IComponentData> componentDatas, SpriteSheetAnimator animator){
     Entity e = EntityManager.CreateEntity(archetype);
     animator.currentAnimationIndex = animator.defaultAnimationIndex;
     SpriteSheetAnimationData startAnim = animator.animations[animator.defaultAnimationIndex];
@@ -71,9 +72,12 @@ public abstract class SpriteSheetManager {
     }
     EntityManager.SetComponentData(e, new SpriteSheetAnimation { maxSprites = animation.sprites.Length, play = animation.playOnStart, samples = animation.samples, repetition = animation.repetition, elapsedFrames = 0 });
     EntityManager.SetComponentData(e, new SpriteIndex { Value = animation.startIndex });
+    MarkDirty<SpriteSheetColor>(e);
+    MarkDirty<SpriteIndex>(e);
+    MarkDirty<SpriteMatrix>(e);
   }
 
-  public static void SetAnimation(EntityCommandBuffer commandBuffer, Entity e, SpriteSheetAnimationData animation, BufferHook hook){
+  public static void SetAnimation(EntityCommandBuffer commandBuffer, Entity e, SpriteSheetAnimationData animation, BufferHook hook) {
     Material oldMaterial = DynamicBufferManager.GetMaterial(hook.bufferEnityID);
     string oldAnimation = SpriteSheetCache.GetMaterialName(oldMaterial);
     if(animation.animationName != oldAnimation) {
@@ -92,6 +96,16 @@ public abstract class SpriteSheetManager {
     }
     commandBuffer.SetComponent(e, new SpriteSheetAnimation { maxSprites = animation.sprites.Length, play = animation.playOnStart, samples = animation.samples, repetition = animation.repetition, elapsedFrames = 0 });
     commandBuffer.SetComponent(e, new SpriteIndex { Value = animation.startIndex });
+    MarkDirty<SpriteSheetColor>(e, commandBuffer);
+    MarkDirty<SpriteIndex>(e, commandBuffer);
+    MarkDirty<SpriteMatrix>(e, commandBuffer);
+  }
+
+  public static void MarkDirty<T>(Entity e) where T : struct , IComponentData {
+    EntityManager.SetComponentData(e, entityManager.GetComponentData<T>(e));
+  }
+  public static void MarkDirty<T>(Entity e,EntityCommandBuffer ecb) where T : struct, IComponentData {
+    ecb.SetComponent(e, entityManager.GetComponentData<T>(e));
   }
 
   public static void UpdateEntity(Entity entity, IComponentData componentData) {
@@ -124,13 +138,8 @@ public abstract class SpriteSheetManager {
   }
 
   public static void RecordAnimator(SpriteSheetAnimator animator){
-    foreach(SpriteSheetAnimationData animation in animator.animations) {
-      KeyValuePair<Material, float4[]> atlasData = SpriteSheetCache.BakeSprites(animation.sprites, animation.animationName);
-      SpriteSheetMaterial material = new SpriteSheetMaterial { material = atlasData.Key };
-      DynamicBufferManager.GenerateBuffers(material);
-      DynamicBufferManager.BakeUvBuffer(material, atlasData);
-      renderInformation.Add(new RenderInformation(material.material, DynamicBufferManager.GetEntityBuffer(material.material)));
-    }
+    foreach(SpriteSheetAnimationData animation in animator.animations)
+      RecordSpriteSheet(animation.sprites, animation.name);
   }
 
   public static void CleanBuffers() {
@@ -138,10 +147,12 @@ public abstract class SpriteSheetManager {
       renderInformation[i].DestroyBuffers();
     renderInformation.Clear();
   }
+
   public static void ReleaseUvBuffer(int bufferID) {
     if(renderInformation[bufferID].uvBuffer != null)
       renderInformation[bufferID].uvBuffer.Release();
   }
+
   public static void ReleaseBuffer(int bufferID) {
     if(renderInformation[bufferID].matrixBuffer != null)
       renderInformation[bufferID].matrixBuffer.Release();

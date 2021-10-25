@@ -8,8 +8,8 @@ using UnityEngine;
 public class DynamicAnimationsDemo: MonoBehaviour, IConvertGameObjectToEntity {
   public SpriteSheetAnimator animator;
   public static Entity character;
-  public void Convert(Entity entity, EntityManager eManager, GameObjectConversionSystem conversionSystem)
-  {
+
+  public void Convert(Entity entity, EntityManager eManager, GameObjectConversionSystem conversionSystem){
     // 1) Create Archetype
     EntityArchetype archetype = eManager.CreateArchetype(
              typeof(Position2D),
@@ -23,6 +23,7 @@ public class DynamicAnimationsDemo: MonoBehaviour, IConvertGameObjectToEntity {
              typeof(SpriteMatrix),
              typeof(BufferHook)
     );
+
     SpriteSheetManager.RecordAnimator(animator);
 
     var color = Color.white;
