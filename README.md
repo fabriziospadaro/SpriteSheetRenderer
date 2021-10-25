@@ -1,6 +1,12 @@
-# SpriteSheetRenderer
-A powerful Unity ECS system to render massive numbers of animated sprites using DynamicBuffers and ComputeBuffer:
-##### 1 million animated sprites were rendered at 60fps on a Mid-2015 MacBook Pro.
+## Support
+SpriteSheetRenderer is an open-source project that I am developing in my free time. If you like it you can support me by donations.
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/LRTk8rn
+)
+
+# SpriteSheetRenderer (updated to unity 2020.3 and entitas V0.17.0)
+A powerful Unity ECS system to render massive numbers of animated sprites using the new dots stack, taking full advantages of Jobs, DynamicBuffers and ComputeBuffer:
+##### 1 million animated sprites were rendered at 60fps(none of them was hurt during the process) on a Mid-2015 MacBook Pro.
 ![N|Solid](https://forum.unity.com/proxy.php?image=https%3A%2F%2Fi.imgur.com%2FzRSWhy0.png&hash=754bc4b4187e2d72ce0eb2c578b996dc)
 ## C# 4 required
 
@@ -104,8 +110,3 @@ for(int i = 0; i < entities.Length; i++) {
   eManager.SetSharedComponentData(e, material);
 }
 ```
-
-# Support
-### SpriteSheetRenderer is an open-source project that I am developing in my free time. If you like it you can support me by donating.
-
-Buy Me A Coffee: https://www.buymeacoffee.com/LRTk8rn
