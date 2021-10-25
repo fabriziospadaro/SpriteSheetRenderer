@@ -8,7 +8,6 @@ public class Fractalnitializer : MonoBehaviour, IConvertGameObjectToEntity {
   public static EntityArchetype archetype;
   public static QuadTree qt;
   public void Convert(Entity entity, EntityManager eManager, GameObjectConversionSystem conversionSystem) {
-    SpriteSheetManager.SetEntityManager(eManager);
     archetype = eManager.CreateArchetype(
        typeof(Position2D),
        typeof(Rotation2D),
