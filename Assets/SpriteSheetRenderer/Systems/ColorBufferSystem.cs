@@ -20,10 +20,19 @@ public class ColorBufferSystem : SystemBase {
       Dependency = JobHandle.CombineDependencies(Dependency, hooksHandle);
 
       Dependency = JobHandle.CombineDependencies(Dependency,Entities.WithName("ColorBufferSystem").WithReadOnly(spriteSheetColors).WithReadOnly(bufferHooks).ForEach(
-        (ref DynamicBuffer<SpriteColorBuffer> spriteColorBuffers, in EntityIDComponent entityID) => {
-          for(int i = 0; i < bufferHooks.Length; i++)
-            if(bufferHooks[i].bufferEnityID == entityID.id)
-              spriteColorBuffers[bufferHooks[i].bufferID] = spriteSheetColors[i].color;
+        (ref DynamicBuffer<SpriteColorBuffer> spriteColorBuffers,in DynamicBuffer<IdsBuffer> idsBuffer, in EntityIDComponent entityID) => {
+          for(int i = 0; i < bufferHooks.Length; i++) {
+            if(bufferHooks[i].bufferEntityID == entityID.id) {
+              int id = 0;
+              for(int j = 0; j < idsBuffer.Length; j++) {
+                if(idsBuffer[j] == bufferHooks[i].bufferID) {
+                  id = j;
+                  break;
+                }
+              }
+              spriteColorBuffers[id] = spriteSheetColors[i].color;
+            }
+          }
         }
       )
       .WithDisposeOnCompletion(bufferHooks)

@@ -27,7 +27,7 @@ public class SingleEntityDestroy : MonoBehaviour, IConvertGameObjectToEntity {
     SpriteSheetManager.RecordSpriteSheet(sprites, "emoji");
   }
   void Update() {
-    if(Input.GetKeyDown(KeyCode.Space)) {
+    if(Input.GetKey(KeyCode.Space)) {
       int maxSprites = SpriteSheetCache.GetLength("emoji");
       var color = UnityEngine.Random.ColorHSV(.35f, .85f);
 

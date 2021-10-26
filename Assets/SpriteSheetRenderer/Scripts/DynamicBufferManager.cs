@@ -18,8 +18,6 @@ public static class DynamicBufferManager {
   //contains the index of a bufferEntity inside the bufferEntities from a material
   private static Dictionary<Material, int> materialEntityBufferID = new Dictionary<Material, int>();
 
-  private static Dictionary<Material, List<int>> availableEntityID = new Dictionary<Material, List<int>>();
-
   //only use this when you didn't bake the uv yet
   public static void BakeUvBuffer(SpriteSheetMaterial spriteSheetMaterial, KeyValuePair<Material, float4[]> atlasData) {
     Entity entity = GetEntityBuffer(spriteSheetMaterial.material);
@@ -31,9 +29,6 @@ public static class DynamicBufferManager {
   public static void GenerateBuffers(SpriteSheetMaterial material, int entityCount = 0) {
     if(!materialEntityBufferID.ContainsKey(material.material)) {
       CreateBuffersContainer(material);
-      availableEntityID.Add(material.material, new List<int>());
-      for(int i = 0; i < entityCount; i++)
-        availableEntityID[material.material].Add(i);
       MassAddBuffers(bufferEntities.Last(), entityCount);
     }
   }
@@ -47,6 +42,7 @@ public static class DynamicBufferManager {
       typeof(SpriteColorBuffer),
       typeof(SpriteSheetMaterial),
       typeof(UvBuffer),
+      typeof(IdsBuffer),
       typeof(EntityIDComponent)
     );
     Entity e = EntityManager.CreateEntity(archetype);
@@ -63,28 +59,31 @@ public static class DynamicBufferManager {
     var indexBuffer = EntityManager.GetBuffer<SpriteIndexBuffer>(bufferEntity);
     var colorBuffer = EntityManager.GetBuffer<SpriteColorBuffer>(bufferEntity);
     var matrixBuffer = EntityManager.GetBuffer<MatrixBuffer>(bufferEntity);
+    var idsBuffer = EntityManager.GetBuffer<IdsBuffer>(bufferEntity);
     for(int i = 0; i < entityCount; i++) {
       indexBuffer.Add(new SpriteIndexBuffer());
       matrixBuffer.Add(new MatrixBuffer());
       colorBuffer.Add(new SpriteColorBuffer());
+      idsBuffer.Add(new IdsBuffer {  value = i});
     }
   }
 
-  public static int AddDynamicBuffers(Entity bufferEntity, Material material) {
-    int bufferId = NextIDForEntity(material);
+  public static int AddDynamicBuffers(Entity bufferEntity) {
+    var la = EntityManager.GetBuffer<IdsBuffer>(bufferEntity).Reinterpret<int>();
+    int bufferId = 0;
+    if(la.Length > 0)
+      bufferId = NextID(la);
+    
     var indexBuffer = EntityManager.GetBuffer<SpriteIndexBuffer>(bufferEntity);
+
     var colorBuffer = EntityManager.GetBuffer<SpriteColorBuffer>(bufferEntity);
     var matrixBuffer = EntityManager.GetBuffer<MatrixBuffer>(bufferEntity);
-    if(indexBuffer.Length <= bufferId) {
-      indexBuffer.Add(new SpriteIndexBuffer());
-      colorBuffer.Add(new SpriteColorBuffer());
-      matrixBuffer.Add(new MatrixBuffer());
-    }
+    var idsBuffer = EntityManager.GetBuffer<IdsBuffer>(bufferEntity);
+    indexBuffer.Add(new SpriteIndexBuffer());
+    colorBuffer.Add(new SpriteColorBuffer());
+    matrixBuffer.Add(new MatrixBuffer());
+    idsBuffer.Add(new IdsBuffer { value = bufferId });
     return bufferId;
-  }
-
-  public static BufferHook GetBufferHook(SpriteSheetMaterial material) {
-    return new BufferHook { bufferEnityID = materialEntityBufferID[material.material], bufferID = NextIDForEntity(material.material) };
   }
 
   public static int GetEntityBufferID(SpriteSheetMaterial material) {
@@ -95,58 +94,74 @@ public static class DynamicBufferManager {
     return bufferEntities[materialEntityBufferID[material]];
   }
 
-  public static int NextIDForEntity(Material material) {
-    var ids = availableEntityID[material];
-    var availableIds = Enumerable.Range(0, ids.Count + 1).Except(ids);
-    int smallerID = availableIds.First();
-    ids.Add(smallerID);
-    return smallerID;
+  static int NextID(DynamicBuffer<int> A){
+    // Our original array
+    int maxVal = int.MinValue;
+    int i;
+    for(i = 0; i < A.Length; i++)
+      if(A[i] > maxVal)
+        maxVal = A[i];
+
+    int m = maxVal+1; // Storing maximum value
+
+    // In case all values in our array are negative
+    if(m < 1) {
+      return 1;
+    }
+    if(A.Length == 1) {
+
+      // If it contains only one element
+      if(A[0] == 1) {
+        return 2;
+      }
+      else {
+        return 1;
+      }
+    }
+    i = 0;
+    int[] l = new int[m];
+    for(i = 0; i < A.Length; i++) {
+      if(A[i] > 0) {
+        // Changing the value status at the index of
+        // our list
+        if(l[A[i] - 1] != 1) {
+          l[A[i] - 1] = 1;
+        }
+      }
+    }
+
+    // Encountering first 0, i.e, the element with least
+    // value
+    for(i = 0; i < l.Length; i++) {
+      if(l[i] == 0) {
+        return i + 1;
+      }
+    }
+
+    // In case all values are filled between 1 and m
+    return i + 2;
   }
+
+  static int findFirstMissing(DynamicBuffer<int> array,int start, int end){
+    if(start > end)
+      return end + 1;
+
+    if(start != array[start])
+      return start;
+
+    int mid = (start + end) / 2;
+
+    if(array[mid] == mid)
+      return findFirstMissing(array, mid + 1, end);
+
+    return findFirstMissing(array, start, mid);
+  }
+
   public static Material GetMaterial(int bufferEntityID) {
     foreach(KeyValuePair<Material, int> e in materialEntityBufferID)
       if(e.Value == bufferEntityID)
         return e.Key;
     return null;
-  }
-  public static void RemoveBuffer(Material material, int bufferID) {
-    Entity bufferEntity = GetEntityBuffer(material);
-    availableEntityID[material].Remove(bufferID);
-    CleanBuffer(bufferID, bufferEntity);
-  }
-
-  private static void CleanBuffer(int bufferID, Entity bufferEntity) {
-    EntityManager.GetBuffer<SpriteIndexBuffer>(bufferEntity).RemoveAt(bufferID);
-    EntityManager.GetBuffer<MatrixBuffer>(bufferEntity).RemoveAt(bufferID);
-    EntityManager.GetBuffer<SpriteColorBuffer>(bufferEntity).RemoveAt(bufferID);
-
-    EntityManager.GetBuffer<SpriteIndexBuffer>(bufferEntity).Insert(bufferID, new SpriteIndexBuffer { index = -1 });
-    EntityManager.GetBuffer<MatrixBuffer>(bufferEntity).Insert(bufferID, new MatrixBuffer());
-    EntityManager.GetBuffer<SpriteColorBuffer>(bufferEntity).Insert(bufferID, new SpriteColorBuffer());
-  }
-
-  public static DynamicBuffer<SpriteIndexBuffer>[] GetIndexBuffers() {
-    DynamicBuffer<SpriteIndexBuffer>[] buffers = new DynamicBuffer<SpriteIndexBuffer>[bufferEntities.Count];
-    for(int i = 0; i < buffers.Length; i++)
-      buffers[i] = EntityManager.GetBuffer<SpriteIndexBuffer>(bufferEntities[i]);
-    return buffers;
-  }
-  public static DynamicBuffer<MatrixBuffer>[] GetMatrixBuffers(EntityManager jobEmanager) {
-    DynamicBuffer<MatrixBuffer>[] buffers = new DynamicBuffer<MatrixBuffer>[bufferEntities.Count];
-    for(int i = 0; i < buffers.Length; i++)
-      buffers[i] = jobEmanager.GetBuffer<MatrixBuffer>(bufferEntities[i]);
-    return buffers;
-  }
-  public static DynamicBuffer<SpriteColorBuffer>[] GetColorBuffers() {
-    DynamicBuffer<SpriteColorBuffer>[] buffers = new DynamicBuffer<SpriteColorBuffer>[bufferEntities.Count];
-    for(int i = 0; i < buffers.Length; i++)
-      buffers[i] = EntityManager.GetBuffer<SpriteColorBuffer>(bufferEntities[i]);
-    return buffers;
-  }
-  public static DynamicBuffer<UvBuffer>[] GetUvBuffers() {
-    DynamicBuffer<UvBuffer>[] buffers = new DynamicBuffer<UvBuffer>[bufferEntities.Count];
-    for(int i = 0; i < buffers.Length; i++)
-      buffers[i] = EntityManager.GetBuffer<UvBuffer>(bufferEntities[i]);
-    return buffers;
   }
 
 }

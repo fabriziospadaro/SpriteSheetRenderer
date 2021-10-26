@@ -51,7 +51,7 @@ namespace ECSSpriteSheetAnimation.Examples {
         var color = UnityEngine.Random.ColorHSV(.15f, .75f);
         SpriteSheetColor col = new SpriteSheetColor { color = new float4(color.r, color.g, color.b, color.a) };
         eManager.SetComponentData(e, col);
-        eManager.SetComponentData(e, new BufferHook { bufferID = i, bufferEnityID = DynamicBufferManager.GetEntityBufferID(material) });
+        eManager.SetComponentData(e, new BufferHook { bufferID = i, bufferEntityID = DynamicBufferManager.GetEntityBufferID(material) });
         eManager.SetSharedComponentData(e, material);
       }
     }

@@ -20,12 +20,12 @@ public abstract class SpriteSheetManager {
   public static Entity Instantiate(EntityArchetype archetype, List<IComponentData> componentDatas, string spriteSheetName) {
     Entity e = EntityManager.CreateEntity(archetype);
     Material material = SpriteSheetCache.GetMaterial(spriteSheetName);
-    int bufferID = DynamicBufferManager.AddDynamicBuffers(DynamicBufferManager.GetEntityBuffer(material), material);
+    int bufferID = DynamicBufferManager.AddDynamicBuffers(DynamicBufferManager.GetEntityBuffer(material));
     foreach(IComponentData Idata in componentDatas)
       EntityManager.SetComponentData(e, (dynamic)Idata);
 
     var spriteSheetMaterial = new SpriteSheetMaterial { material = material };
-    BufferHook bh = new BufferHook { bufferID = bufferID, bufferEnityID = DynamicBufferManager.GetEntityBufferID(spriteSheetMaterial) };
+    BufferHook bh = new BufferHook { bufferID = bufferID, bufferEntityID = DynamicBufferManager.GetEntityBufferID(spriteSheetMaterial) };
     EntityManager.SetComponentData(e, bh);
     EntityManager.SetSharedComponentData(e, spriteSheetMaterial);
     return e;
@@ -37,12 +37,12 @@ public abstract class SpriteSheetManager {
     SpriteSheetAnimationData startAnim = animator.animations[animator.defaultAnimationIndex];
     int maxSprites = startAnim.sprites.Length;
     Material material = SpriteSheetCache.GetMaterial(animator.animations[animator.defaultAnimationIndex].animationName);
-    int bufferID = DynamicBufferManager.AddDynamicBuffers(DynamicBufferManager.GetEntityBuffer(material), material);
+    int bufferID = DynamicBufferManager.AddDynamicBuffers(DynamicBufferManager.GetEntityBuffer(material));
     foreach(IComponentData Idata in componentDatas)
       EntityManager.SetComponentData(e, (dynamic)Idata);
 
     var spriteSheetMaterial = new SpriteSheetMaterial { material = material };
-    BufferHook bh = new BufferHook { bufferID = bufferID, bufferEnityID = DynamicBufferManager.GetEntityBufferID(spriteSheetMaterial) };
+    BufferHook bh = new BufferHook { bufferID = bufferID, bufferEntityID = DynamicBufferManager.GetEntityBufferID(spriteSheetMaterial) };
     EntityManager.SetComponentData(e, bh);
     EntityManager.SetComponentData(e, new SpriteSheetAnimation {  maxSprites = maxSprites , play = startAnim.playOnStart, samples = startAnim.samples, repetition = startAnim.repetition});
     EntityManager.SetComponentData(e, new SpriteIndex { Value = startAnim.startIndex });
@@ -53,7 +53,7 @@ public abstract class SpriteSheetManager {
   }
 
   public static void SetAnimation(Entity e, SpriteSheetAnimationData animation){
-    int bufferEnityID = EntityManager.GetComponentData<BufferHook>(e).bufferEnityID;
+    int bufferEnityID = EntityManager.GetComponentData<BufferHook>(e).bufferEntityID;
     int bufferID = EntityManager.GetComponentData<BufferHook>(e).bufferID;
     Material oldMaterial = DynamicBufferManager.GetMaterial(bufferEnityID);
     string oldAnimation = SpriteSheetCache.GetMaterialName(oldMaterial);
@@ -61,11 +61,9 @@ public abstract class SpriteSheetManager {
       Material material = SpriteSheetCache.GetMaterial(animation.animationName);
       var spriteSheetMaterial = new SpriteSheetMaterial { material = material };
 
-      DynamicBufferManager.RemoveBuffer(oldMaterial, bufferID);
-
       //use new buffer
-      bufferID = DynamicBufferManager.AddDynamicBuffers(DynamicBufferManager.GetEntityBuffer(material), material);
-      BufferHook bh = new BufferHook { bufferID = bufferID, bufferEnityID = DynamicBufferManager.GetEntityBufferID(spriteSheetMaterial) };
+      bufferID = DynamicBufferManager.AddDynamicBuffers(DynamicBufferManager.GetEntityBuffer(material));
+      BufferHook bh = new BufferHook { bufferID = bufferID, bufferEntityID = DynamicBufferManager.GetEntityBufferID(spriteSheetMaterial) };
 
       EntityManager.SetSharedComponentData(e, spriteSheetMaterial);
       EntityManager.SetComponentData(e, bh);
@@ -78,18 +76,17 @@ public abstract class SpriteSheetManager {
   }
 
   public static void SetAnimation(EntityCommandBuffer commandBuffer, Entity e, SpriteSheetAnimationData animation, BufferHook hook) {
-    Material oldMaterial = DynamicBufferManager.GetMaterial(hook.bufferEnityID);
+    Material oldMaterial = DynamicBufferManager.GetMaterial(hook.bufferEntityID);
     string oldAnimation = SpriteSheetCache.GetMaterialName(oldMaterial);
     if(animation.animationName != oldAnimation) {
       Material material = SpriteSheetCache.GetMaterial(animation.animationName);
       var spriteSheetMaterial = new SpriteSheetMaterial { material = material };
 
       //clean old buffer
-      DynamicBufferManager.RemoveBuffer(oldMaterial, hook.bufferID);
 
       //use new buffer
-      int bufferID = DynamicBufferManager.AddDynamicBuffers(DynamicBufferManager.GetEntityBuffer(material), material);
-      BufferHook bh = new BufferHook { bufferID = bufferID, bufferEnityID = DynamicBufferManager.GetEntityBufferID(spriteSheetMaterial) };
+      int bufferID = DynamicBufferManager.AddDynamicBuffers(DynamicBufferManager.GetEntityBuffer(material));
+      BufferHook bh = new BufferHook { bufferID = bufferID, bufferEntityID = DynamicBufferManager.GetEntityBufferID(spriteSheetMaterial) };
 
       commandBuffer.SetSharedComponent(e, spriteSheetMaterial);
       commandBuffer.SetComponent(e, bh);
@@ -116,17 +113,8 @@ public abstract class SpriteSheetManager {
     commandBuffer.SetComponent(entity, (dynamic)componentData);
   }
 
-  public static void DestroyEntity(Entity e, string materialName) {
-    Material material = SpriteSheetCache.GetMaterial(materialName);
-    int bufferID = EntityManager.GetComponentData<BufferHook>(e).bufferID;
-    DynamicBufferManager.RemoveBuffer(material, bufferID);
-    EntityManager.DestroyEntity(e);
-  }
-
-  public static void DestroyEntity(EntityCommandBuffer commandBuffer, Entity e, BufferHook hook) {
-    commandBuffer.DestroyEntity(e);
-    Material material = DynamicBufferManager.GetMaterial(hook.bufferEnityID);
-    DynamicBufferManager.RemoveBuffer(material, hook.bufferID);
+  public static void DestroyEntity(Entity e) {
+    EntityManager.AddComponent<RequireDestroyComponent>(e);
   }
 
   public static void RecordSpriteSheet(Sprite[] sprites, string spriteSheetName, int spriteCount = 0) {
