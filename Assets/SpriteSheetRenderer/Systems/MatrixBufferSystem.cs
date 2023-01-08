@@ -2,7 +2,7 @@
 using Unity.Entities;
 using Unity.Jobs;
 
-public class MatrixBufferSystem : SystemBase {
+public partial class MatrixBufferSystem : SystemBase {
   EntityQuery query;
 
   protected override void OnCreate(){
