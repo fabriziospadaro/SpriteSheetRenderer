@@ -3078,7 +3078,7 @@ TextureImporter:
       213: 6348646232723148048
     second: 1bit-kennynl_1024
   externalObjects: {}
-  serializedVersion: 10
+  serializedVersion: 12
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -3098,6 +3098,8 @@ TextureImporter:
   isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -3107,8 +3109,8 @@ TextureImporter:
   textureSettings:
     serializedVersion: 2
     filterMode: 0
-    aniso: -1
-    mipBias: -100
+    aniso: 1
+    mipBias: 0
     wrapU: 1
     wrapV: 1
     wrapW: 1
@@ -3129,11 +3131,16 @@ TextureImporter:
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 1
+  cookieLightType: 1
   platformSettings:
-  - serializedVersion: 2
+  - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -3144,7 +3151,8 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
-  - serializedVersion: 2
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
     buildTarget: Standalone
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -3155,6 +3163,19 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
+    buildTarget: Server
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 1
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -4512,6 +4533,71 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      1bit-kennynl_52: 2660087518270875073
+      1bit-kennynl_21: 6756441452203483074
+      1bit-kennynl_41: -8727176764571603312
+      1bit-kennynl_49: 2339193378089995211
+      1bit-kennynl_51: -7490600887629441901
+      1bit-kennynl_5: -2896342936669345622
+      1bit-kennynl_55: -5729265941571839772
+      1bit-kennynl_16: -6269534642481279281
+      1bit-kennynl_18: 7088985554447517081
+      1bit-kennynl_30: -1958468124865806112
+      1bit-kennynl_0: 6797741591340832258
+      1bit-kennynl_33: 6799226711921067709
+      1bit-kennynl_8: -6818893673047856951
+      1bit-kennynl_34: -6884711162074360425
+      1bit-kennynl_6: -6238104163968224529
+      1bit-kennynl_2: -4336377058555009779
+      1bit-kennynl_3: -2837347343044443318
+      1bit-kennynl_47: 2428582260365127044
+      1bit-kennynl_14: -1410373012541814305
+      1bit-kennynl_62: -3705341209193386819
+      1bit-kennynl_37: -6738849949099080586
+      1bit-kennynl_54: 8063653764807198947
+      1bit-kennynl_26: -1771780831898250090
+      1bit-kennynl_45: -4403442885131873971
+      1bit-kennynl_23: -6117280402061736007
+      1bit-kennynl_58: -3389567563577405277
+      1bit-kennynl_25: 8025793818648318321
+      1bit-kennynl_36: -5216995752355833947
+      1bit-kennynl_53: 6786102940563048334
+      1bit-kennynl_10: 2818965227934204182
+      1bit-kennynl_29: 6791405237003153178
+      1bit-kennynl_59: 718860864409648831
+      1bit-kennynl_31: -3665135733888953531
+      1bit-kennynl_46: 649678570077151341
+      1bit-kennynl_19: 3247448951452964749
+      1bit-kennynl_50: -6988868838696795927
+      1bit-kennynl_40: -6459390945945824665
+      1bit-kennynl_48: 8903181891100446877
+      1bit-kennynl_39: -4057731185872585317
+      1bit-kennynl_44: -5749357725757923580
+      1bit-kennynl_56: 6337327798681595081
+      1bit-kennynl_22: -3531768925929642157
+      1bit-kennynl_4: -1397973447338208431
+      1bit-kennynl_11: 1815313514622129468
+      1bit-kennynl_60: -5993218037647462456
+      1bit-kennynl_20: 3589981998501679386
+      1bit-kennynl_9: 1716920232066283920
+      1bit-kennynl_12: -2955994032907614642
+      1bit-kennynl_43: -8273803566698016722
+      1bit-kennynl_7: -4568812497173000395
+      1bit-kennynl_32: -812302957183085187
+      1bit-kennynl_28: -2543030247687566151
+      1bit-kennynl_24: 3961146165064710134
+      1bit-kennynl_17: 5681039558445236949
+      1bit-kennynl_42: 3414398267711066780
+      1bit-kennynl_63: -8532015669230584892
+      1bit-kennynl_13: 6004062526164164904
+      1bit-kennynl_35: 2623390479499570972
+      1bit-kennynl_1: -5592356013027741539
+      1bit-kennynl_61: -3930993700769348557
+      1bit-kennynl_38: 6597087958334735949
+      1bit-kennynl_57: -8145348381112612642
+      1bit-kennynl_15: 7081480758791880447
+      1bit-kennynl_27: 7237196526971645207
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

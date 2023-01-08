@@ -3,9 +3,9 @@ using Unity.Burst;
 using Unity.Jobs;
 using UnityEngine;
 
-public class SpriteSheetAnimationSystem : JobComponentSystem {
+public partial class SpriteSheetAnimationSystem : SystemBase {
   [BurstCompile]
-  struct SpriteSheetAnimationJob : IJobForEach<SpriteSheetAnimation, SpriteIndex> {
+  partial struct SpriteSheetAnimationJob : IJobEntity {
 
     public void Execute(ref SpriteSheetAnimation AnimCmp, ref SpriteIndex spriteSheetCmp) {
       if(AnimCmp.play && AnimCmp.elapsedFrames % AnimCmp.samples == 0 && AnimCmp.elapsedFrames != 0) {
@@ -37,9 +37,10 @@ public class SpriteSheetAnimationSystem : JobComponentSystem {
     }
   }
 
-  protected override JobHandle OnUpdate(JobHandle inputDeps) {
-    var job = new SpriteSheetAnimationJob();
-    return job.Schedule(this, inputDeps);
-  }
+    protected override void OnUpdate()
+    {
+        var job = new SpriteSheetAnimationJob();
+        job.Schedule();
+    }
 }
 

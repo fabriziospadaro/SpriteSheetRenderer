@@ -222,7 +222,7 @@ TextureImporter:
       213: -6056688053818895493
     second: characters_72
   externalObjects: {}
-  serializedVersion: 10
+  serializedVersion: 12
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -242,6 +242,8 @@ TextureImporter:
   isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -250,9 +252,9 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: -1
-    aniso: -1
-    mipBias: -100
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
     wrapU: 1
     wrapV: 1
     wrapW: 1
@@ -273,9 +275,14 @@ TextureImporter:
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 1
+  cookieLightType: 1
   platformSettings:
   - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
@@ -303,6 +310,18 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 3
     buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Server
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -1859,6 +1878,80 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      characters_23: -4031619653288768660
+      characters_18: 4306828662039877052
+      characters_34: -6603193462306882315
+      characters_47: -1981437635880020547
+      characters_2: 7755224123621818408
+      characters_11: -3102994270238535240
+      characters_36: 2093188768341758965
+      characters_62: -6764882747809796459
+      characters_51: -3501350889093356843
+      characters_68: 6299452940519449263
+      characters_7: -5691007311618604778
+      characters_44: -1509298647979629103
+      characters_3: -3557554893070573299
+      characters_1: -517894308114096243
+      characters_4: -4256427906160430202
+      characters_69: -4365678376696325385
+      characters_65: -2390135654043814455
+      characters_27: 2860487071760280893
+      characters_5: -6066236442320969475
+      characters_6: 1893670189769602202
+      characters_21: 7565877224362775616
+      characters_0: 3083089168873209362
+      characters_50: -6626920692342517838
+      characters_24: 442113960596436644
+      characters_72: -6056688053818895493
+      characters_16: 8901077990765384427
+      characters_26: -7676043117880224163
+      characters_60: 3721987491355019842
+      characters_9: -7232779301871914677
+      characters_38: 2231020222837286545
+      characters_22: 2243496752862105744
+      characters_29: 5731562298934000515
+      characters_12: -4572274602858593414
+      characters_41: 8262985221905841761
+      characters_39: 7609787605624061525
+      characters_19: 3538125613680756451
+      characters_40: -8879491853263213150
+      characters_63: 4728118799374588956
+      characters_59: -6249355941540749095
+      characters_71: 2924033600936126985
+      characters_48: -7365091535247084893
+      characters_10: 7729768860333772239
+      characters_13: 1189779305756619486
+      characters_25: -3284978671773823301
+      characters_43: -6878064802024223989
+      characters_31: 9158924008245724444
+      characters_66: 4496391894325732752
+      characters_61: 3510613755944070091
+      characters_45: -3889344650559148656
+      characters_56: -4309814623186541336
+      characters_42: 2011002775766109113
+      characters_70: 3696329424477584276
+      characters_49: 1820790034032967366
+      characters_28: 939489211220940695
+      characters_53: 6432319930159689466
+      characters_37: 7744072722613937420
+      characters_46: 1062266681453288945
+      characters_64: -3148958741520818204
+      characters_30: 1569994384330951894
+      characters_8: -417436994572597314
+      characters_17: -919312135990662955
+      characters_54: 8544167053749469260
+      characters_58: 7042348869349113295
+      characters_55: 5386867447942924094
+      characters_14: -1975635887328401948
+      characters_15: 4367732871754573918
+      characters_35: 7033315285397903179
+      characters_32: -5465283732883496055
+      characters_67: -7672714760311331509
+      characters_20: -2976837118148077081
+      characters_57: 4485183727095702631
+      characters_33: -2093133780709834730
+      characters_52: -7409678193281308084
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

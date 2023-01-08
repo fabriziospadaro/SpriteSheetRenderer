@@ -3,7 +3,7 @@ using Unity.Burst;
 using Unity.Jobs;
 using Unity.Collections;
 
-public class SpriteSheetRotationSystem : SystemBase {
+public partial class SpriteSheetRotationSystem : SystemBase {
   protected override void OnUpdate(){
     Entities.WithName("SpriteSheetRotationSystem").WithChangeFilter<Rotation2D>().ForEach(
       (ref SpriteMatrix renderData, in Rotation2D rotation) => {

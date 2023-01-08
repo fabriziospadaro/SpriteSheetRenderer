@@ -3,7 +3,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
-public class ColorBufferSystem : SystemBase {
+public partial class ColorBufferSystem : SystemBase {
   EntityQuery query;
 
   protected override void OnCreate(){

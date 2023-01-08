@@ -2,7 +2,7 @@
 using Unity.Entities;
 using Unity.Jobs;
 
-public class UVBufferSystem : SystemBase {
+public partial class UVBufferSystem : SystemBase {
   EntityQuery query;
 
   protected override void OnCreate(){
